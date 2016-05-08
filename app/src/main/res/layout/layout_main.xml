@@ -1,0 +1,295 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:stream="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/AliceBlue"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/circle_button"
+                android:onClick="onClick"
+                android:src="@drawable/ic_action_settings" />
+
+            <RelativeLayout
+                android:id="@+id/lyReset"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:background="@android:color/transparent">
+
+                <ImageButton
+                    android:id="@+id/arrow_up1"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/btnReset"
+                    android:background="@drawable/arrow_up"
+                    android:rotation="180"
+                    android:scaleType="center"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnReset"
+                    style="@android:style/Widget.Holo.Button.Borderless.Small"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:onClick="onClick"
+                    android:text="RESET"
+                    android:textColor="@color/Black" />
+
+                <ImageButton
+                    android:id="@+id/arrow_up2"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/btnReset"
+                    android:background="@drawable/arrow_up"
+                    android:rotation="180"
+                    android:scaleType="center"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/btnCameraMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/circle_button"
+                android:onClick="onClick"
+                android:src="@drawable/ic_action_camera"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:id="@+id/lyWifi"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/lyReset"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_wifi" />
+
+                <TextView
+                    android:id="@+id/txtWifiSignal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center"
+                    android:text="50%" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lyBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_gravity="center"
+                android:layout_toRightOf="@+id/lyWifi"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="30dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_battery" />
+
+                <TextView
+                    android:id="@+id/txtBettery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center"
+                    android:text="50%" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/btnSetting"
+                android:text="xxx" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/lyFirst"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:stream="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.github.niqdev.ipcam.IpCamDefaultActivity">
+
+            <com.github.niqdev.mjpeg.MjpegSurfaceView
+                android:id="@+id/mjpegViewDefault"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                stream:type="stream_default" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/lySec"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent">
+
+            <com.example.user.dronecpe.view.JoystickView
+                android:id="@+id/joystickView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"></com.example.user.dronecpe.view.JoystickView>
+
+            <com.example.user.dronecpe.view.JoystickView
+                android:id="@+id/joystickView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true" />
+
+            <com.example.user.dronecpe.view.AccelerometerView
+                android:id="@+id/gyroSensorView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
+    </FrameLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:background="@color/AliceBlue">
+
+        <RelativeLayout
+            android:id="@+id/lyTakeOff"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+
+            <ImageButton
+                android:id="@+id/arrow_up3"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/btnTakeOff"
+                android:background="@drawable/arrow_up"
+                android:scaleType="center" />
+
+            <Button
+                android:id="@+id/btnTakeOff"
+                style="@android:style/Widget.Holo.Button.Borderless.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:onClick="onClick"
+                android:text="TAKE OFF"
+                android:textColor="@color/Black" />
+
+            <ImageButton
+                android:id="@+id/arrow_up4"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/btnTakeOff"
+                android:background="@drawable/arrow_up"
+                android:scaleType="center" />
+        </RelativeLayout>
+
+        <!--Left-->
+        <TextView
+            android:id="@+id/txt1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="ss" />
+
+        <TextView
+            android:id="@+id/txt2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="ss" />
+
+        <TextView
+            android:id="@+id/txt3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="ss" />
+
+
+        <!-- Right -->
+        <TextView
+            android:id="@+id/txt4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="ss" />
+
+        <TextView
+            android:id="@+id/txt5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="ss" />
+
+        <TextView
+            android:id="@+id/txt6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="ss" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>

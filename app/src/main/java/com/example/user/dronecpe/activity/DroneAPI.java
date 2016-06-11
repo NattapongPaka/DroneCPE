@@ -4,6 +4,12 @@ package com.example.user.dronecpe.activity;
  * Created by USER on 8/5/2559.
  */
 public class DroneAPI {
+    /**
+     * Protocal
+     */
+    public static final String POST = "POST";
+    public static final String GET = "GET";
+
 
     /**
      * API Income cmd from drone
@@ -32,5 +38,9 @@ public class DroneAPI {
     public static final String DRONE_GIMBAL_AXIS_YAW = "108";
     public static final String DRONE_GIMBAL_AXIS_PITCH = "109";
     public static final String DRONE_GIMBAL_AXIS_ROLL = "110";
+
+    //Action
+    public static final String DRONE_RESET = "1";
+    public static final String DRONE_TAKEOFF = "1";
 
 }

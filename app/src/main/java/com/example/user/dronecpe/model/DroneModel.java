@@ -12,6 +12,9 @@ public class DroneModel {
 	private String gps;
 	private String ready;
 	private String joyDirection;
+	private String droneReset;
+	private String droneTakeOff;
+
 	/*******************************************************************
 	 * 
 	 * 1.Method Interface Listener
@@ -41,6 +44,13 @@ public class DroneModel {
 		void onGPSListener(DroneModel droneModel);
 	}
 
+	public interface OnResetListener{
+		void onReset(DroneModel droneModel);
+	}
+
+	public interface OnTakeOffListener{
+		void onTakeOff(DroneModel droneModel);
+	}
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -52,6 +62,8 @@ public class DroneModel {
 	private OnBatteryListener onBatteryListener;
 	private OnSignalWifiListener onSignalWifiListener;
 	private OnGPSListener onGPSListener;
+	private OnResetListener onResetListener;
+	private OnTakeOffListener onTakeOffListener;
 	/*******************************************************************
 	 * 
 	 * 3.Method Listener
@@ -74,6 +86,12 @@ public class DroneModel {
 	}
 	public void setOnGPSListener(OnGPSListener onGPSListener){
 		this.onGPSListener = onGPSListener;
+	}
+	public void setOnResetListener(OnResetListener onResetListener){
+		this.onResetListener = onResetListener;
+	}
+	public void setOnTakeOffListener(OnTakeOffListener onTakeOffListener){
+		this.onTakeOffListener = onTakeOffListener;
 	}
 	/*******************************************************************
 	 * 
@@ -122,6 +140,16 @@ public class DroneModel {
 		}
 	}
 
+	public void setDroneReset(String reset){
+		this.droneReset = reset;
+		if(onResetListener != null){
+			this.onResetListener.onReset(this);
+		}
+	}
+
+	public void setDroneTakeOff(String takeOff){
+		this.droneTakeOff = takeOff;
+	}
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
@@ -161,5 +189,13 @@ public class DroneModel {
 
 	public String getJoyDirection() {
 		return joyDirection;
+	}
+
+	public String getDroneReset(){
+		return droneReset;
+	}
+
+	public String getDroneTakeOff(){
+		return droneTakeOff;
 	}
 }

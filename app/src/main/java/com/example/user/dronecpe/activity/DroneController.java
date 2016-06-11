@@ -35,6 +35,7 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     public DroneController(Context c, String dstAddress, int dstPort) {
         this.dstAddress = dstAddress;
         this.dstPort = dstPort;
+        mDroneModel.setOnJoystickMoveListener(this);
         mBroadcastManager = LocalBroadcastManager.getInstance(c);
         try {
             Thread mThread = new Thread(new SocketIncomeThread());
@@ -51,7 +52,12 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
 
     @Override
     public void onJoystickMoveListener(DroneModel droneModel) {
-
+        try{
+            SendData(droneModel.getJoyDirection());
+            Log.i("DroneController", droneModel.getJoyDirection());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     /**

@@ -29,10 +29,13 @@ import com.example.user.dronecpe.view.AccelerometerView;
 import com.example.user.dronecpe.view.JoystickView;
 import com.github.niqdev.mjpeg.DisplayMode;
 import com.github.niqdev.mjpeg.Mjpeg;
+import com.github.niqdev.mjpeg.MjpegInputStream;
 import com.github.niqdev.mjpeg.MjpegView;
 
-public class MainActivity extends Activity implements DroneModel.OnGyroSensorListener,DroneModel.OnReadyListener,DroneModel.OnBatteryListener,DroneModel.OnSignalWifiListener,DroneModel.OnGPSListener
-        ,OnClickListener,QuickAction.OnActionItemClickListener {
+import rx.functions.Action1;
+
+public class MainActivity extends Activity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
+        , OnClickListener, QuickAction.OnActionItemClickListener {
     private TextView angleTextViewLeft;
     private TextView powerTextViewLeft;
     private TextView directionTextViewLeft;
@@ -180,7 +183,6 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         mQuickAction.setOnActionItemClickListener(this);
     }
 
-
     /**
      * All Initializing
      */
@@ -203,7 +205,9 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         txtStatus = (TextView) findViewById(R.id.txtStatus);
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
         joystickLeft = (JoystickView) findViewById(R.id.joystickView1);
+        joystickLeft.setJoyID(JoystickView.JOY_LEFT);
         joystickRight = (JoystickView) findViewById(R.id.joystickView2);
+        joystickRight.setJoyID(JoystickView.JOY_RIGHT);
         txtWifiSignal = (TextView) findViewById(R.id.txtWifiSignal);
         txtBettery = (TextView) findViewById(R.id.txtBettery);
         mjpegView = (MjpegView) findViewById(R.id.mjpegViewDefault);
@@ -211,7 +215,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         Setting();
     }
 
-    public void InitEvent(){
+    public void InitEvent() {
         // Register Model Listener
         mDroneModel.setOnGyroSensorListener(this);
         mDroneModel.setOnReadyListener(this);
@@ -222,6 +226,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
         joystickRight.setOnJoystickMoveListener(onJoystickMoveListenerRight, JoystickView.DEFAULT_LOOP_INTERVAL);
     }
+
     /******************************************************************************
      * Sensor Listener
      *******************************************************************************/
@@ -237,8 +242,10 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 
         }
     };
+
     /**
      * All button event
+     *
      * @param v
      */
     @Override
@@ -280,6 +287,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
      *******************************************************************************/
     private JoystickView.OnJoystickMoveListener onJoystickMoveListenerLeft = new JoystickView.OnJoystickMoveListener() {
         String cmd;
+
         @Override
         public void onValueChanged(int angle, int power, int direction) {
             runOnUiThread(new Runnable() {
@@ -291,48 +299,48 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
                         //Throttle high
                         case JoystickView.FRONT:
                             directionTextViewLeft.setText("front");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.FRONT_RIGHT:
                             directionTextViewLeft.setText("front_right");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.LEFT_FRONT:
                             directionTextViewLeft.setText("left_front");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Throttle low
                         case JoystickView.RIGHT_BOTTOM:
                             directionTextViewLeft.setText("right_bottom");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.BOTTOM:
                             directionTextViewLeft.setText("bottom");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.BOTTOM_LEFT:
                             directionTextViewLeft.setText("bottom_left");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Yaw right
                         case JoystickView.RIGHT:
                             directionTextViewLeft.setText("right");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_YAW_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Yaw left
                         case JoystickView.LEFT:
                             directionTextViewLeft.setText("left");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_YAW_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
@@ -353,6 +361,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
      *******************************************************************************/
     private JoystickView.OnJoystickMoveListener onJoystickMoveListenerRight = new JoystickView.OnJoystickMoveListener() {
         String cmd;
+
         @Override
         public void onValueChanged(int angle, int power, int direction) {
             runOnUiThread(new Runnable() {
@@ -364,48 +373,48 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
                         //Pitch forward
                         case JoystickView.FRONT:
                             directionTextViewRight.setText("front");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.FRONT_RIGHT:
                             directionTextViewRight.setText("front_right");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.LEFT_FRONT:
                             directionTextViewRight.setText("left_front");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Pitch backward
                         case JoystickView.RIGHT_BOTTOM:
                             directionTextViewRight.setText("right_bottom");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.BOTTOM:
                             directionTextViewRight.setText("bottom");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
                         case JoystickView.BOTTOM_LEFT:
                             directionTextViewRight.setText("bottom_left");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Roll right
                         case JoystickView.RIGHT:
                             directionTextViewRight.setText("right");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_ROLL_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
                         //Roll left
                         case JoystickView.LEFT:
                             directionTextViewRight.setText("left");
-                            cmd = DroneAPI.POST +","+ DroneAPI.DRONE_ROLL_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+                            cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
                             mDroneModel.setJoyDirection(cmd);
                             break;
 
@@ -420,6 +429,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 
     /**
      * Quick action event
+     *
      * @param quickAction
      * @param pos
      * @param actionId
@@ -429,7 +439,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         ActionItem actionItem = quickAction.getActionItem(pos);
         if (actionId == ID_OPEN) {
             wifiApManager.setWifiApEnabled(null, true);
-            mDroneController = new DroneController(this,DroneController.DRONE_IP,DroneController.PORT_OUT);
+            mDroneController = new DroneController(this, DroneController.DRONE_IP, DroneController.PORT_OUT);
         }
         if (actionId == ID_CLOSE) {
             wifiApManager.setWifiApEnabled(null, false);
@@ -439,6 +449,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 
     /**
      * Drone model listener
+     *
      * @param droneModel
      */
     @Override
@@ -474,7 +485,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 
     @Override
     public void onSignalWifiListener(DroneModel droneModel) {
-        Log.i("onSignalWifiListenerUI",droneModel.getSignalWifi());
+        Log.i("onSignalWifiListenerUI", droneModel.getSignalWifi());
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -581,7 +592,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 //            }
 //        }
 //    }
-     /******************************************************************************
+    /******************************************************************************
      // Sensor Register un use
      //*******************************************************************************/
 //    public void GyroSensorRegister() {
@@ -591,7 +602,6 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 //                    SensorManager.SENSOR_DELAY_NORMAL);
 //        }
 //    }
-
 
 
 }

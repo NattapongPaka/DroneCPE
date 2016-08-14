@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -25,6 +26,10 @@ public class JoystickView extends View implements Runnable {
     public final static int BOTTOM_LEFT = 8;
     public final static int LEFT = 1;
     public final static int LEFT_FRONT = 2;
+
+    public final static int JOY_LEFT = 1;
+    public final static int JOY_RIGHT = 2;
+
     // Variables
     private OnJoystickMoveListener onJoystickMoveListener; // Listener
     private Thread thread = new Thread(this);
@@ -38,6 +43,8 @@ public class JoystickView extends View implements Runnable {
     private Paint button;
     private Paint horizontalLine;
     private Paint verticalLine;
+
+    private Paint mPaintIconJoyLeft;
     private Bitmap arrow_up;
     private int joystickRadius;
     private int buttonRadius;
@@ -52,6 +59,12 @@ public class JoystickView extends View implements Runnable {
     //private DroneModel droneModel;
     private float arrow_width;
     private float arrow_hight;
+    private Bitmap icon_drone_down;
+    private Bitmap icon_drone_up;
+    private Bitmap icon_drone_yaw_left;
+    private Bitmap icon_drone_yaw_right;
+
+    private int JOY_ID;
 
     public JoystickView(Context context) {
         super(context);
@@ -92,7 +105,21 @@ public class JoystickView extends View implements Runnable {
         arrow_up = BitmapFactory.decodeResource(getResources(), R.drawable.joy);
         arrow_up = Bitmap.createScaledBitmap(arrow_up, 100, 100, false);
 
+        mPaintIconJoyLeft = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaintIconJoyLeft.setAntiAlias(true);
 
+        icon_drone_down = BitmapFactory.decodeResource(getResources(), R.drawable.ic_drone_down);
+        icon_drone_down = resizeImageForImageView(icon_drone_down);
+
+        icon_drone_up = BitmapFactory.decodeResource(getResources(), R.drawable.ic_drone_up);
+        icon_drone_up = resizeImageForImageView(icon_drone_up);
+
+        icon_drone_yaw_left = BitmapFactory.decodeResource(getResources(), R.drawable.ic_drone_yaw_left);
+        icon_drone_yaw_left = resizeImageForImageView(icon_drone_yaw_left);
+
+        icon_drone_yaw_right = BitmapFactory.decodeResource(getResources(), R.drawable.ic_drone_yaw_right);
+        icon_drone_yaw_right = resizeImageForImageView(icon_drone_yaw_right);
+        //icon_drone_down = Bitmap.createScaledBitmap(icon_drone_down, icon_drone_down.getWidth(), icon_drone_down.getHeight(), true);
     }
 
     @Override
@@ -136,6 +163,30 @@ public class JoystickView extends View implements Runnable {
         return result;
     }
 
+    int scaleSize =64;
+    public Bitmap resizeImageForImageView(Bitmap bitmap) {
+        Bitmap resizedBitmap = null;
+        int originalWidth = bitmap.getWidth();
+        int originalHeight = bitmap.getHeight();
+        int newWidth = -1;
+        int newHeight = -1;
+        float multFactor = -1.0F;
+        if(originalHeight > originalWidth) {
+            newHeight = scaleSize ;
+            multFactor = (float) originalWidth/(float) originalHeight;
+            newWidth = (int) (newHeight*multFactor);
+        } else if(originalWidth > originalHeight) {
+            newWidth = scaleSize ;
+            multFactor = (float) originalHeight/ (float)originalWidth;
+            newHeight = (int) (newWidth*multFactor);
+        } else if(originalHeight == originalWidth) {
+            newHeight = scaleSize ;
+            newWidth = scaleSize ;
+        }
+        resizedBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+        return resizedBitmap;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
 
@@ -159,6 +210,24 @@ public class JoystickView extends View implements Runnable {
         arrow_width = xPosition - (arrow_up.getWidth() / 2);
         arrow_hight = yPosition - (arrow_up.getHeight() / 2);
         canvas.drawBitmap(arrow_up, arrow_width, arrow_hight, logoPaint);
+
+//        if(JOY_ID == JOY_LEFT) {
+//            //icon_throttle up
+//            float x1 = (float) (centerX - (icon_drone_up.getWidth() / 2));
+//            float y1 = (float) (centerY - joystickRadius);
+//            canvas.drawBitmap(icon_drone_up, x1, y1, mPaintIconJoyLeft);
+//
+//            //icon_throttle down
+//            float x2 = (float) (centerX - (icon_drone_down.getWidth() / 2));
+//            float y2 = (float) (centerY + joystickRadius);
+//            canvas.drawBitmap(icon_drone_down, x2, y2, mPaintIconJoyLeft);
+//        }
+//        if(JOY_ID == JOY_RIGHT){
+//            //icon_throttle down
+//            float x3 = (float) joystickRadius - (icon_drone_yaw_right.getWidth() / 2);
+//            float y3 = (float) centerY;
+//            canvas.drawBitmap(icon_drone_yaw_right, x3, y3, mPaintIconJoyLeft);
+//        }
     }
 
     @Override
@@ -261,10 +330,13 @@ public class JoystickView extends View implements Runnable {
     /*********************************************************************
      * 1.Event Listener
      *********************************************************************/
-    public void setOnJoystickMoveListener(OnJoystickMoveListener listener,
-                                          long repeatInterval) {
+    public void setOnJoystickMoveListener(OnJoystickMoveListener listener,long repeatInterval) {
         this.onJoystickMoveListener = listener;
         this.loopInterval = repeatInterval;
+    }
+
+    public void setJoyID(int joyID){
+        this.JOY_ID = joyID;
     }
 
     /*********************************************************************

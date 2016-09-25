@@ -85,6 +85,8 @@ public class GPSTracker extends Service implements LocationListener {
         super.onCreate();
         mContext = getApplicationContext();
         location = getLocation();
+        mDroneModel.setLocationPlayer(location != null ? location : null);
+        mDroneModel.setProviderEnabled(canGetLocation);
     }
 
     @Override
@@ -122,7 +124,7 @@ public class GPSTracker extends Service implements LocationListener {
     }
 
     public Subscription updateLocation(){
-        return Observable.timer(3000, TimeUnit.MILLISECONDS, Schedulers.newThread())
+        return Observable.interval(3000, TimeUnit.MILLISECONDS, Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override

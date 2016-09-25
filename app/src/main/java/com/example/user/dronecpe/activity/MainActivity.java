@@ -28,8 +28,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,6 +37,7 @@ import com.example.user.dronecpe.R;
 import com.example.user.dronecpe.hotspot.WifiApManager;
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
+import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
 import com.example.user.dronecpe.qaction.ActionItem;
 import com.example.user.dronecpe.qaction.QuickAction;
 import com.example.user.dronecpe.view.AccelerometerView;
@@ -51,10 +50,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
-
-import org.w3c.dom.Text;
 
 public class MainActivity extends Activity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
         , OnClickListener, QuickAction.OnActionItemClickListener , DroneModel.OnGPSPlayerListener {
@@ -111,7 +106,6 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
     private LocalBinder myService;
     private boolean isBound = false;
-
 
     /**
      * Activity Life cycle

@@ -1,41 +1,65 @@
 package com.example.user.dronecpe.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.user.dronecpe.R;
 import com.example.user.dronecpe.hotspot.WifiApManager;
 import com.example.user.dronecpe.model.DroneModel;
+import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.qaction.ActionItem;
 import com.example.user.dronecpe.qaction.QuickAction;
 import com.example.user.dronecpe.view.AccelerometerView;
 import com.example.user.dronecpe.view.JoystickView;
 import com.github.niqdev.mjpeg.DisplayMode;
 import com.github.niqdev.mjpeg.Mjpeg;
-import com.github.niqdev.mjpeg.MjpegInputStream;
 import com.github.niqdev.mjpeg.MjpegView;
 
-import rx.functions.Action1;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+
+import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends Activity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
-        , OnClickListener, QuickAction.OnActionItemClickListener {
+        , OnClickListener, QuickAction.OnActionItemClickListener , DroneModel.OnGPSPlayerListener {
+    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
+
     private TextView angleTextViewLeft;
     private TextView powerTextViewLeft;
     private TextView directionTextViewLeft;
@@ -43,6 +67,10 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     private TextView angleTextViewRight;
     private TextView powerTextViewRight;
     private TextView directionTextViewRight;
+
+    private TextView txtLatLng;
+    private TextView txtGPS;
+    private ImageView imgGPS;
 
     private TextView txtBettery;
     private TextView txtStatus;
@@ -81,20 +109,39 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
 
     private DroneController mDroneController;
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
+    private LocalBinder myService;
+    private boolean isBound = false;
+
 
     /**
      * Activity Life cycle
      */
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (myService != null) {
+            Intent intent = new Intent(this, GPSTracker.class);
+            bindService(intent, myConnection, BIND_AUTO_CREATE);
+        }
+
+    }
+
+    @Override
     protected void onDestroy() {
-        super.onDestroy();
         wifiApManager.setWifiApEnabled(null, false);
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(mySensorEventListener);
         }
-//        if (mThread != null) {
-//            stopThread();
-//        }
+        if (mDroneController != null) {
+            mDroneController.stopSocketIncomeThread();
+            mDroneController = null;
+        }
+        if (myService != null) {
+            unbindService(myConnection);
+            myService = null;
+            isBound = false;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -119,10 +166,110 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         mHandler.post(mTimer1);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+
+    /**
+     * Check permission for api >= 23
+     */
+    private void requestPermissionLocation() {
+        List<String> permissionsNeeded = new ArrayList<String>();
+        List<String> permissionsList = new ArrayList<String>();
+
+        if (!addPermission(permissionsList, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            permissionsNeeded.add("GPS");
+        }
+        if (!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            permissionsNeeded.add("AGPS");
+        }
+        /**
+         * Show dialog request permission with first run app
+         */
+        if (permissionsList.size() > 0) {
+            if (permissionsNeeded.size() > 0) {
+                String message = "You need to grant access to " + permissionsNeeded.get(0);
+                for (int i = 1; i < permissionsNeeded.size(); i++) {
+                    message = message + ", " + permissionsNeeded.get(i);
+                }
+                showMessageOKCancel(message, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions(
+                                MainActivity.this,
+                                permissionsList.toArray(new String[permissionsList.size()]),
+                                REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+                    }
+                });
+                return;
+            }
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    permissionsList.toArray(new String[permissionsList.size()]),
+                    REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+        }
     }
+
+    /**
+     * Check permission never ask again
+     *
+     * @param permissionsList
+     * @param permission
+     * @return
+     */
+    private boolean addPermission(List<String> permissionsList, String permission) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(permission);
+            // Check for Rationale Option
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Generate alert dialog
+     *
+     * @param message
+     * @param okListener
+     */
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+                HashMap<String, Integer> perms = new HashMap<String, Integer>();
+                // Initial
+                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.ACCESS_COARSE_LOCATION, PackageManager.PERMISSION_GRANTED);
+                // Fill with results
+                for (int i = 0; i < permissions.length; i++) {
+                    perms.put(permissions[i], grantResults[i]);
+                }
+                // Check for ACCESS_FINE_LOCATION
+                if (perms.get(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        && perms.get(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    // All Permissions Granted
+                    Toast.makeText(MainActivity.this, "Some Permission is Granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, "Some Permission is Denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+            break;
+
+            default: {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            }
+            break;
+        }
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,7 +278,9 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         InitLayout();
         InitView();
         InitEvent();
+        requestPermissionLocation();
         wifiApManager = new WifiApManager(this);
+        startService(new Intent(this, GPSTracker.class));
     }
 
     /**
@@ -193,6 +342,9 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     }
 
     public void InitView() {
+        txtGPS = (TextView) findViewById(R.id.txtGPS);
+        txtLatLng = (TextView) findViewById(R.id.txtLatLng);
+        imgGPS = (ImageView) findViewById(R.id.imgGPS);
         mAccelerometer = (AccelerometerView) findViewById(R.id.gyroSensorView);
         mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         mSensorManager.registerListener(mySensorEventListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
@@ -222,6 +374,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         mDroneModel.setOnBatteryListener(this);
         mDroneModel.setOnSignalWifiListener(this);
         mDroneModel.setOnGPSListener(this);
+        mDroneModel.setOnGPSPlayerListener(this);
         // Register Joy Listener
         joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
         joystickRight.setOnJoystickMoveListener(onJoystickMoveListenerRight, JoystickView.DEFAULT_LOOP_INTERVAL);
@@ -443,6 +596,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         }
         if (actionId == ID_CLOSE) {
             wifiApManager.setWifiApEnabled(null, false);
+            mDroneController.stopSocketIncomeThread();
         }
     }
 
@@ -489,11 +643,61 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-
                 String msg = droneModel.getSignalWifi();
                 txtWifiSignal.setText(msg);
             }
         });
+    }
+
+    /**
+     * Player GPS
+     */
+    private ServiceConnection myConnection = new ServiceConnection() {
+
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            myService = binder.getService();
+            isBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+            isBound = false;
+            myService = null;
+        }
+    };
+
+    @Override
+    public void onLocationPlayer(DroneModel droneModel) {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Location location = droneModel.getLocationPlayer();
+                if (txtLatLng != null && location != null) {
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+                    txtLatLng.setText(String.format(Locale.getDefault(), "Lat %3.5f : Lng %3.5f", lat, lng));
+                }
+            }
+        }, 10);
+    }
+
+    @Override
+    public void onProviderEnabled(DroneModel droneModel) {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (imgGPS != null) {
+                    if (droneModel.isProviderEnabled()) {
+                        imgGPS.setImageResource(R.drawable.ic_gps_fixed_black_24dp);
+                        txtGPS.setText("On");
+                    } else {
+                        imgGPS.setImageResource(R.drawable.ic_gps_off_black_24dp);
+                        txtGPS.setText("Off");
+                        txtLatLng.setText("GPS signal not found");
+                    }
+                }
+            }
+        }, 10);
     }
 
     /**

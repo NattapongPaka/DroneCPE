@@ -17,6 +17,32 @@
             android:background="@color/AliceBlue"
             android:gravity="center">
 
+            <LinearLayout
+                android:id="@+id/lyGPS"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/lyReset"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgGPS"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_gps_off_black_24dp" />
+
+                <TextView
+                    android:id="@+id/txtGPS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center"
+                    android:text="Off" />
+            </LinearLayout>
+
             <ImageButton
                 android:id="@+id/btnSetting"
                 android:layout_width="wrap_content"
@@ -172,6 +198,16 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent">
 
+            <TextView
+                android:id="@+id/txtLatLng"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="@color/White"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Lat 33.12345 : Lng 33.4567" />
+
             <com.example.user.dronecpe.view.JoystickView
                 android:id="@+id/joystickView1"
                 android:layout_width="wrap_content"
@@ -193,7 +229,6 @@
 
         </RelativeLayout>
     </FrameLayout>
-
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -288,8 +323,6 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:text="ss" />
-
-
     </RelativeLayout>
 
 </LinearLayout>

@@ -1,5 +1,7 @@
 package com.example.user.dronecpe.model;
 
+import android.location.Location;
+
 public class DroneModel {
 
 	private float[] acceleration = new float[3];
@@ -14,6 +16,8 @@ public class DroneModel {
 	private String joyDirection;
 	private String droneReset;
 	private String droneTakeOff;
+	private Location locationPlayer;
+	private boolean isProviderEnabled;
 
 	/*******************************************************************
 	 * 
@@ -51,6 +55,11 @@ public class DroneModel {
 	public interface OnTakeOffListener{
 		void onTakeOff(DroneModel droneModel);
 	}
+
+	public interface OnGPSPlayerListener{
+		void onLocationPlayer(DroneModel droneModel);
+		void onProviderEnabled(DroneModel droneModel);
+	}
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -64,6 +73,7 @@ public class DroneModel {
 	private OnGPSListener onGPSListener;
 	private OnResetListener onResetListener;
 	private OnTakeOffListener onTakeOffListener;
+	private OnGPSPlayerListener onGPSPlayerListener;
 	/*******************************************************************
 	 * 
 	 * 3.Method Listener
@@ -93,11 +103,29 @@ public class DroneModel {
 	public void setOnTakeOffListener(OnTakeOffListener onTakeOffListener){
 		this.onTakeOffListener = onTakeOffListener;
 	}
+
+	public void setOnGPSPlayerListener(OnGPSPlayerListener onGPSPlayerListener){
+		this.onGPSPlayerListener = onGPSPlayerListener;
+	}
 	/*******************************************************************
 	 * 
 	 * 4.Method Setter
 	 * 
 	 *******************************************************************/
+	public void setProviderEnabled(boolean isEnabled){
+		this.isProviderEnabled = isEnabled;
+		if(onGPSPlayerListener != null){
+			this.onGPSPlayerListener.onProviderEnabled(this);
+		}
+	}
+
+	public void setLocationPlayer(Location locationPlayer){
+		this.locationPlayer = locationPlayer;
+		if(onGPSPlayerListener != null){
+			this.onGPSPlayerListener.onLocationPlayer(this);
+		}
+	}
+
 	public void setAcceleration(float[] acc) {
 		this.acceleration = acc;
 		if (onGyroSensorListener != null) {
@@ -150,11 +178,23 @@ public class DroneModel {
 	public void setDroneTakeOff(String takeOff){
 		this.droneTakeOff = takeOff;
 	}
+
+
+
+
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
 	 * 
 	 *******************************************************************/
+	public boolean isProviderEnabled() {
+		return isProviderEnabled;
+	}
+
+	public Location getLocationPlayer() {
+		return locationPlayer;
+	}
+
 	public float[] getAcceleration() {
 		return acceleration;
 	}

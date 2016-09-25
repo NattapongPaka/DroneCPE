@@ -1,11 +1,14 @@
 package com.example.user.dronecpe.activity;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.user.dronecpe.model.DroneModel;
+import com.example.user.dronecpe.model.GPSTracker;
+import com.google.android.gms.location.LocationRequest;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,12 +16,23 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by USER on 7/5/2559.
  */
 public class DroneController implements DroneModel.OnJoystickMoveListener {
 
+    private Context context;
+    private String TAG = DroneController.class.getSimpleName();
+    private SocketIncomeThread mThread;
     private String response = "";
     private String dstAddress;
     private int dstPort;
@@ -31,17 +45,31 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     private ServerSocket serverSocket;
 
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
+    private GPSTracker mGpsTracker;
+    private long LOCATION_UPDATE_INTERVAL = 100;
+    private long LOCATION_TIMEOUT_IN_SECONDS = 10;
+    private float SUFFICIENT_ACCURACY = 100.0f;
 
     public DroneController(Context c, String dstAddress, int dstPort) {
+        this.mGpsTracker = new GPSTracker();
+        this.context = c;
         this.dstAddress = dstAddress;
         this.dstPort = dstPort;
         mDroneModel.setOnJoystickMoveListener(this);
         mBroadcastManager = LocalBroadcastManager.getInstance(c);
         try {
-            Thread mThread = new Thread(new SocketIncomeThread());
+            //mThread = new Thread(new SocketIncomeThread());
+            mThread = new SocketIncomeThread();
             mThread.start();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public synchronized void stopSocketIncomeThread(){
+        if(mThread != null) {
+            mThread.setShouldStop(true);
+            mThread.interrupt();
         }
     }
 
@@ -68,7 +96,7 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
         String ip;
         int port;
 
-        public SocketOutcomeTask(String ip, int port, String msgOut) {
+        SocketOutcomeTask(String ip, int port, String msgOut) {
             this.ip = ip;
             this.port = port;
             this.msgOut = msgOut;
@@ -142,6 +170,22 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
         Socket socket = null;
         DataInputStream dataInputStream = null;
         DataOutputStream dataOutputStream = null;
+        volatile boolean shouldStop = false;
+
+        public void setShouldStop(boolean shouldStop) {
+            this.shouldStop = shouldStop;
+        }
+
+        @Override
+        public void interrupt() {
+            super.interrupt();
+            Log.d(TAG,"interrupt shouldStop:"+String.valueOf(shouldStop));
+        }
+
+        @Override
+        public boolean isInterrupted() {
+            return shouldStop;
+        }
 
         @Override
         public void run() {
@@ -150,7 +194,8 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
             dataOutputStream = null;
             try {
                 serverSocket = new ServerSocket(PORT_IN);
-                while (true) {
+                while (!shouldStop) {
+                    Log.d(TAG,"shouldStop in while : "+String.valueOf(shouldStop)+":isInterrupt : "+String.valueOf(isInterrupted()));
                     socket = serverSocket.accept();
                     dataInputStream = new DataInputStream(socket.getInputStream());
                     String msgResponse = null;
@@ -159,15 +204,17 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                     }
                     Log.i("msg_form_server", String.valueOf(msgResponse));
                 }
+                if(isInterrupted()){
+                    Log.d(TAG,"shouldStop : "+String.valueOf(shouldStop));
+                }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                Thread.currentThread().isInterrupted();
                 e.printStackTrace();
             } finally {
                 if (socket != null) {
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
@@ -194,7 +241,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
 
     /**
      * Parse command before broadcast
-     *
      * @param msgIn
      */
     private void ParseCommand(String msgIn) {
@@ -221,4 +267,47 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
             Log.i("loop_msg_form_server", KEY + "->" + VALUE);
         }
     }
+
+    /**
+     * Get location
+     */
+//    public void getLocation(){
+//        LocationRequest req = LocationRequest.create()
+//                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+//                .setExpirationDuration(TimeUnit.SECONDS.toMillis(LOCATION_TIMEOUT_IN_SECONDS))
+//                .setInterval(LOCATION_UPDATE_INTERVAL);
+//
+//        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(context);
+//        Observable<Location> goodEnoughQuicklyOrNothingObservable = locationProvider.getUpdatedLocation(req)
+//                .filter(new Func1<Location, Boolean>() {
+//                    @Override
+//                    public Boolean call(Location location) {
+//                        return location.getAccuracy() < SUFFICIENT_ACCURACY;
+//                    }
+//                })
+//                .timeout(LOCATION_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS, Observable.just((Location) null), AndroidSchedulers.mainThread())
+//                .first()
+//                .observeOn(AndroidSchedulers.mainThread());
+//
+//        goodEnoughQuicklyOrNothingObservable.subscribe(new Observer<Location>() {
+//            @Override
+//            public void onCompleted() {
+//
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onNext(Location location) {
+//                if(location != null){
+//                    double lat = location.getLatitude();
+//                    double lng = location.getLongitude();
+//                    Log.d(TAG,String.valueOf(lat)+":"+String.valueOf(lng));
+//                }
+//            }
+//        });
+//    }
 }

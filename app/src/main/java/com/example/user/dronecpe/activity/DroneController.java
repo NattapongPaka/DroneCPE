@@ -1,14 +1,12 @@
 package com.example.user.dronecpe.activity;
 
 import android.content.Context;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
-import com.google.android.gms.location.LocationRequest;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,14 +14,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
-
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by USER on 7/5/2559.
@@ -34,12 +24,13 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     private String TAG = DroneController.class.getSimpleName();
     private SocketIncomeThread mThread;
     private String response = "";
-    private String dstAddress;
-    private int dstPort;
 
-    public static String DRONE_IP = "192.168.43.176";
-    public static final int PORT_OUT = 8000;
-    public static final int PORT_IN = 9000;
+    private String dstAddress;  //drone ip or host ip
+    private int dstPort;        //drone port or host port  -> out come
+
+
+
+    public int PORT_IN = 6000;
 
     private LocalBroadcastManager mBroadcastManager;
     private ServerSocket serverSocket;

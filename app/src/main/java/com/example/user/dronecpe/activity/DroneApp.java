@@ -10,10 +10,16 @@ import com.example.user.dronecpe.model.DroneModel;
 public class DroneApp extends Application {
     private static DroneModel droneModelInstance;
 
-    public static DroneModel getInstanceDroneModel(){
-        if(droneModelInstance == null){
+    public static DroneModel getInstanceDroneModel() {
+        if (droneModelInstance == null) {
             droneModelInstance = new DroneModel();
         }
         return droneModelInstance;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Contextor.getInstance().setContext(this);
     }
 }

@@ -22,8 +22,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,9 +40,12 @@ import com.example.user.dronecpe.hotspot.WifiApManager;
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
+import com.example.user.dronecpe.model.SettingModel;
+import com.example.user.dronecpe.preference.UtilPreference;
 import com.example.user.dronecpe.qaction.ActionItem;
 import com.example.user.dronecpe.qaction.QuickAction;
 import com.example.user.dronecpe.view.AccelerometerView;
+import com.example.user.dronecpe.view.DialogSetting;
 import com.example.user.dronecpe.view.JoystickView;
 import com.github.niqdev.mjpeg.DisplayMode;
 import com.github.niqdev.mjpeg.Mjpeg;
@@ -51,8 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends Activity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
-        , OnClickListener, QuickAction.OnActionItemClickListener , DroneModel.OnGPSPlayerListener {
+public class MainActivity extends AppCompatActivity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
+        , OnClickListener, QuickAction.OnActionItemClickListener, DroneModel.OnGPSPlayerListener {
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
     private TextView angleTextViewLeft;
@@ -90,6 +95,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     private static final int ID_CONNECT = 3;
     private static final int ID_VDO = 4;
     private static final int ID_CAMERA = 5;
+    private static final int ID_SETTING = 6;
 
 //    private int count = 0;
 //    private Socket mSocket;
@@ -107,6 +113,7 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     private LocalBinder myService;
     private boolean isBound = false;
 
+
     /**
      * Activity Life cycle
      */
@@ -117,7 +124,6 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
             Intent intent = new Intent(this, GPSTracker.class);
             bindService(intent, myConnection, BIND_AUTO_CREATE);
         }
-
     }
 
     @Override
@@ -311,18 +317,20 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
      * Setting
      */
     public void Setting() {
-        ActionItem Open = new ActionItem(ID_OPEN, "Open", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        ActionItem Close = new ActionItem(ID_CLOSE, "Close", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        ActionItem Connect = new ActionItem(ID_CONNECT, "Connect", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        ActionItem REC = new ActionItem(ID_VDO, "Rec", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        ActionItem CAMERA = new ActionItem(ID_CAMERA, "Camera", getResources().getDrawable(R.drawable.ic_wifi_icon));
+        ActionItem Open = new ActionItem(ID_OPEN, "OpenHotspot", ActivityCompat.getDrawable(this, R.drawable.ic_wifi_tethering_grey_600_48dp));
+        ActionItem Close = new ActionItem(ID_CLOSE, "CloseHotspot", ActivityCompat.getDrawable(this, R.drawable.ic_portable_wifi_off_grey_600_48dp));
+        //ActionItem Connect = new ActionItem(ID_CONNECT, "Connect", getResources().getDrawable(R.drawable.ic_wifi_icon));
+        //ActionItem Rec = new ActionItem(ID_VDO, "Rec", getResources().getDrawable(R.drawable.ic_wifi_icon));
+        ActionItem Camera = new ActionItem(ID_CAMERA, "Camera", ActivityCompat.getDrawable(this, R.drawable.ic_linked_camera_grey_600_48dp));
+        ActionItem Setting = new ActionItem(ID_SETTING, "Setting", ActivityCompat.getDrawable(this, R.drawable.ic_edit_grey_600_48dp));
 
         mQuickAction = new QuickAction(this);
         mQuickAction.addActionItem(Open);
         mQuickAction.addActionItem(Close);
-        mQuickAction.addActionItem(Connect);
-        mQuickAction.addActionItem(REC);
-        mQuickAction.addActionItem(CAMERA);
+//        mQuickAction.addActionItem(Connect);
+//        mQuickAction.addActionItem(Rec);
+        mQuickAction.addActionItem(Camera);
+        mQuickAction.addActionItem(Setting);
         mQuickAction.setOnActionItemClickListener(this);
     }
 
@@ -585,12 +593,25 @@ public class MainActivity extends Activity implements DroneModel.OnGyroSensorLis
     public void onItemClick(QuickAction quickAction, int pos, int actionId) {
         ActionItem actionItem = quickAction.getActionItem(pos);
         if (actionId == ID_OPEN) {
-            wifiApManager.setWifiApEnabled(null, true);
-            mDroneController = new DroneController(this, DroneController.DRONE_IP, DroneController.PORT_OUT);
+            String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
+            int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
+
+            if (droneIP != null && !droneIP.isEmpty() && dronePort != 0 && dronePort > 0) {
+                wifiApManager.setWifiApEnabled(null, true);
+                mDroneController = new DroneController(this, droneIP, dronePort);
+            } else {
+                Toast.makeText(this, "Please setting!!!", Toast.LENGTH_SHORT).show();
+                DialogSetting mDialogSetting = DialogSetting.newInstance();
+                mDialogSetting.show(getSupportFragmentManager(), "TAG");
+            }
         }
         if (actionId == ID_CLOSE) {
             wifiApManager.setWifiApEnabled(null, false);
             mDroneController.stopSocketIncomeThread();
+        }
+        if (actionId == ID_SETTING) {
+            DialogSetting mDialogSetting = DialogSetting.newInstance();
+            mDialogSetting.show(getSupportFragmentManager(), "TAG");
         }
     }
 

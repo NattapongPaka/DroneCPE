@@ -597,7 +597,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
             int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
 
             if (droneIP != null && !droneIP.isEmpty() && dronePort != 0 && dronePort > 0) {
-                wifiApManager.setWifiApEnabled(null, true);
+                //wifiApManager.setWifiApEnabled(null, true);
                 mDroneController = new DroneController(this, droneIP, dronePort);
             } else {
                 Toast.makeText(this, "Please setting!!!", Toast.LENGTH_SHORT).show();

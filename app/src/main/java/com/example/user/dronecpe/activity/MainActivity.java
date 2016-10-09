@@ -606,7 +606,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
             }
         }
         if (actionId == ID_CLOSE) {
-            wifiApManager.setWifiApEnabled(null, false);
+            //wifiApManager.setWifiApEnabled(null, false);
             mDroneController.stopSocketIncomeThread();
         }
         if (actionId == ID_SETTING) {

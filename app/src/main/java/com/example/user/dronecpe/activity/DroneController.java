@@ -28,8 +28,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     private String dstAddress;  //drone ip or host ip
     private int dstPort;        //drone port or host port  -> out come
 
-
-
     public int PORT_IN = 6000;
 
     private LocalBroadcastManager mBroadcastManager;
@@ -115,11 +113,9 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                 }
 
             } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 response = "UnknownHostException: " + e.toString();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 response = "IOException: " + e.toString();
             } finally {
@@ -127,7 +123,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
@@ -136,7 +131,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                     try {
                         dataOutputStream.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
@@ -145,7 +139,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                     try {
                         dataInputStream.close();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }

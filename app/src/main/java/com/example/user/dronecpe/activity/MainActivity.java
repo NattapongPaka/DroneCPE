@@ -128,7 +128,9 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 
     @Override
     protected void onDestroy() {
-        wifiApManager.setWifiApEnabled(null, false);
+        if(wifiApManager != null){
+            wifiApManager.setWifiApEnabled(null, false);
+        }
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(mySensorEventListener);
         }
@@ -209,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 
     /**
      * Check permission never ask again
-     *
      * @param permissionsList
      * @param permission
      * @return
@@ -606,8 +607,11 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
             }
         }
         if (actionId == ID_CLOSE) {
+
             //wifiApManager.setWifiApEnabled(null, false);
-            mDroneController.stopSocketIncomeThread();
+            if(mDroneController != null) {
+                mDroneController.stopSocketIncomeThread();
+            }
         }
         if (actionId == ID_SETTING) {
             DialogSetting mDialogSetting = DialogSetting.newInstance();

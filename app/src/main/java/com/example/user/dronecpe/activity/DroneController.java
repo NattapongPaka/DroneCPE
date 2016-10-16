@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
+import com.orhanobut.logger.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.Executor;
 
 /**
  * Created by USER on 7/5/2559.
@@ -60,18 +62,19 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
             mThread.setShouldStop(true);
             mThread.interrupt();
         }
+
     }
 
     private synchronized void SendData(String value) {
         SocketOutcomeTask mSocketOutcomeTask = new SocketOutcomeTask(this.dstAddress, dstPort, value);
-        mSocketOutcomeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mSocketOutcomeTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 
     @Override
     public void onJoystickMoveListener(DroneModel droneModel) {
         try{
             SendData(droneModel.getJoyDirection());
-            Log.i("DroneController", droneModel.getJoyDirection());
+            Logger.d(droneModel.getJoyDirection());
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -96,7 +99,6 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
             Socket socket = null;
             DataOutputStream dataOutputStream = null;
             DataInputStream dataInputStream = null;
-
             try {
                 socket = new Socket(dstAddress, dstPort);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -104,12 +106,16 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
 
                 if (msgOut != null) {
                     dataOutputStream.writeUTF(msgOut);
+                    dataOutputStream.flush();
                 }
 
                 String msgResponse;
-                while ((msgResponse = dataInputStream.readLine()) != null) {
-                    Log.i("readByte", String.valueOf(msgResponse));
-                    ParseCommand(msgResponse);
+                //Logger.d("Data available %d",dataInputStream.available());
+                if(dataInputStream.available() > 0) {
+                    while ((msgResponse = dataInputStream.readLine()) != null) {
+                        //Logger.d("Data response %s",msgResponse);
+                        ParseCommand(msgResponse);
+                    }
                 }
 
             } catch (UnknownHostException e) {
@@ -144,6 +150,11 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
                 }
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
         }
     }
 

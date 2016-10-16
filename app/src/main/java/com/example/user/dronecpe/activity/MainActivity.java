@@ -1,7 +1,6 @@
 package com.example.user.dronecpe.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,7 +21,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +38,6 @@ import com.example.user.dronecpe.hotspot.WifiApManager;
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
-import com.example.user.dronecpe.model.SettingModel;
 import com.example.user.dronecpe.preference.UtilPreference;
 import com.example.user.dronecpe.qaction.ActionItem;
 import com.example.user.dronecpe.qaction.QuickAction;
@@ -412,14 +409,17 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
                 mQuickAction.setAnimStyle(QuickAction.ANIM_GROW_FROM_LEFT);
                 break;
 
-            case R.id.btnCameraMenu:
-                // custom dialog
-                final Dialog dialog = new Dialog(this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                //dialog.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                dialog.setContentView(R.layout.layout_dialog);
-                dialog.show();
+//            case R.id.btnCameraMenu:
+//                // custom dialog
+//                final Dialog dialog = new Dialog(this);
+//                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//                //dialog.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+//                dialog.setContentView(R.layout.layout_dialog);
+//                dialog.show();
+//                break;
+
+            case R.id.btnInfo:
                 break;
 
             case R.id.btnReset:

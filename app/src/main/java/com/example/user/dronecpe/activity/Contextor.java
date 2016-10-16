@@ -11,7 +11,7 @@ public class Contextor {
     private Context context;
     private static Contextor instance;
 
-    public static Contextor getInstance() {
+    public synchronized static Contextor getInstance() {
         if (instance == null) {
             instance = new Contextor();
         }

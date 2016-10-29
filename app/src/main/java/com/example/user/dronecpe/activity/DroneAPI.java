@@ -37,7 +37,14 @@ public class DroneAPI {
     public static final String DRONE_GIMBAL_AXIS_ROLL = "11";
 
     //Action
-    public static final String DRONE_RESET = "1";
-    public static final String DRONE_TAKEOFF = "1";
+    public static final String DRONE_TAKEOFF = "12";
+    public static final String DRONE_RESET = "13";
+    public static final String DRONE_LANDING = "14";
+
+    //Action value
+    public static final String DRONE_RESET_VALUE = "1";
+    public static final String DRONE_TAKEOFF_VALUE = "1";
+    public static final String DRONE_LANDING_VALUE = "0";
+
 
 }

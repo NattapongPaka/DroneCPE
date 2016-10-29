@@ -193,6 +193,9 @@ public class DroneModel {
 
 	public void setDroneTakeOff(String takeOff){
 		this.droneTakeOff = takeOff;
+		if(onTakeOffListener != null){
+			this.onTakeOffListener.onTakeOff(this);
+		}
 	}
 
 	/*******************************************************************

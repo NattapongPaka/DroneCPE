@@ -93,7 +93,7 @@
                     android:layout_centerHorizontal="true"
                     android:gravity="center"
                     android:onClick="onClick"
-                    android:text="RESET"
+                    android:text="@string/drone_reset"
                     android:textColor="@color/Black" />
 
                 <ImageButton
@@ -258,14 +258,15 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/arrow_up3"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_drone_up_dark"
                 android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
                 android:layout_toLeftOf="@+id/btnTakeOff"
-                android:background="@drawable/arrow_up"
-                android:scaleType="center" />
+                android:scaleType="fitCenter" />
 
             <Button
                 android:id="@+id/btnTakeOff"
@@ -278,14 +279,15 @@
                 android:text="TAKE OFF"
                 android:textColor="@color/Black" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/arrow_up4"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/btnTakeOff"
-                android:background="@drawable/arrow_up"
-                android:scaleType="center" />
+                android:src="@drawable/ic_drone_up_dark"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter" />
         </RelativeLayout>
 
         <!--Left-->

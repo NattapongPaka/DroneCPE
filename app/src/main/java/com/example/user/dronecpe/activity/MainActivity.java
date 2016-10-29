@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,9 +54,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+
 public class MainActivity extends AppCompatActivity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
         , OnClickListener, QuickAction.OnActionItemClickListener, DroneModel.OnGPSPlayerListener {
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
+
+    private ImageView arrow_up3;
+    private ImageView arrow_up4;
 
     private TextView angleTextViewLeft;
     private TextView powerTextViewLeft;
@@ -342,6 +347,8 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     }
 
     public void InitView() {
+        arrow_up3 = (ImageView) findViewById(R.id.arrow_up3);
+        arrow_up4 = (ImageView) findViewById(R.id.arrow_up4);
         txtGPS = (TextView) findViewById(R.id.txtGPS);
         txtLatLng = (TextView) findViewById(R.id.txtLatLng);
         imgGPS = (ImageView) findViewById(R.id.imgGPS);
@@ -424,12 +431,31 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 
             case R.id.btnReset:
                 //Reset drone
-                mDroneModel.setDroneReset(DroneAPI.DRONE_RESET);
+                mDroneModel.setDroneReset(DroneAPI.DRONE_RESET_VALUE);
                 break;
 
             case R.id.btnTakeOff:
                 //Drone Takeoff / landing
-                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF);
+                Button button = (Button) v;
+                if(mDroneModel.getDroneTakeOff() != null) {
+                    if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_TAKEOFF_VALUE)) {
+                        button.setText(R.string.drone_taskOff);
+                        arrow_up3.setImageResource(R.drawable.ic_drone_up_dark);
+                        arrow_up4.setImageResource(R.drawable.ic_drone_up_dark);
+                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_LANDING_VALUE);
+                    } else {
+                        button.setText(R.string.drone_landing);
+                        arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
+                        arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
+                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF_VALUE);
+                    }
+                }else{
+                    //Set first task off
+                    button.setText(R.string.drone_landing);
+                    arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
+                    arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
+                    mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF_VALUE);
+                }
                 break;
         }
     }

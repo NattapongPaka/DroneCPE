@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
+import com.example.user.dronecpe.view.DialogSetting;
 import com.orhanobut.logger.Logger;
 
 import java.io.DataInputStream;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executor;
 /**
  * Created by USER on 7/5/2559.
  */
-public class DroneController implements DroneModel.OnJoystickMoveListener {
+public class DroneController implements DroneModel.OnJoystickMoveListener,DroneModel.OnTakeOffListener,DroneModel.OnResetListener {
 
     private Context context;
     private String TAG = DroneController.class.getSimpleName();
@@ -48,7 +49,7 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
         this.context = c;
         this.dstAddress = dstAddress;
         this.dstPort = dstPort;
-        mDroneModel.setOnJoystickMoveListener(this);
+        registerModelListener();
         mBroadcastManager = LocalBroadcastManager.getInstance(c);
         try {
             //mThread = new Thread(new SocketIncomeThread());
@@ -57,6 +58,12 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void registerModelListener() {
+        mDroneModel.setOnJoystickMoveListener(this);
+        mDroneModel.setOnTakeOffListener(this);
+        mDroneModel.setOnResetListener(this);
     }
 
     public synchronized void initThread(){
@@ -100,6 +107,28 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
 
     private String appendCommand(String req,String droneControlMode,String droneControlSpeed,String droneControlAngle) {
         return req+","+droneControlMode+","+droneControlSpeed+","+droneControlAngle;
+    }
+
+    @Override
+    public void onReset(DroneModel droneModel) {
+        try {
+            String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_RESET,droneModel.getDroneReset(),"0");
+            Logger.d(cmd);
+            SendData(cmd);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onTakeOff(DroneModel droneModel) {
+        try {
+            String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_TAKEOFF,droneModel.getDroneTakeOff(),"0");
+            Logger.d(cmd);
+            SendData(cmd);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     /**

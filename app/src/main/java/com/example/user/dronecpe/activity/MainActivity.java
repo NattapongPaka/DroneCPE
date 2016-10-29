@@ -115,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     private LocalBinder myService;
     private boolean isBound = false;
 
+    private static final int TIME_INTERVAL = 2000; // # milliseconds, desired time passed between two back presses.
+    private long mBackPressed;
 
     /**
      * Activity Life cycle
@@ -284,6 +286,18 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         requestPermissionLocation();
         wifiApManager = new WifiApManager(this);
         startService(new Intent(this, GPSTracker.class));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis()) {
+            super.onBackPressed();
+            return;
+        } else {
+            Toast.makeText(getBaseContext(), "Double click back to exit", Toast.LENGTH_SHORT).show();
+        }
+
+        mBackPressed = System.currentTimeMillis();
     }
 
     /**

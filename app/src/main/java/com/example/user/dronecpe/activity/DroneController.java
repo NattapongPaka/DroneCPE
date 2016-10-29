@@ -41,6 +41,8 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     private long LOCATION_TIMEOUT_IN_SECONDS = 10;
     private float SUFFICIENT_ACCURACY = 100.0f;
 
+    private String lastSpeed;
+
     public DroneController(Context c, String dstAddress, int dstPort) {
         this.mGpsTracker = new GPSTracker();
         this.context = c;
@@ -57,12 +59,16 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
         }
     }
 
+    public synchronized void initThread(){
+        SocketOutcomeTask mSocketOutcomeTask = new SocketOutcomeTask(this.dstAddress, dstPort, "initSocket");
+        mSocketOutcomeTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+    }
+
     public synchronized void stopSocketIncomeThread(){
         if(mThread != null) {
             mThread.setShouldStop(true);
             mThread.interrupt();
         }
-
     }
 
     private synchronized void SendData(String value) {
@@ -73,11 +79,27 @@ public class DroneController implements DroneModel.OnJoystickMoveListener {
     @Override
     public void onJoystickMoveListener(DroneModel droneModel) {
         try{
-            SendData(droneModel.getJoyDirection());
-            Logger.d(droneModel.getJoyDirection());
+            String droneRequest = droneModel.getDroneRequest();
+            String droneMode = droneModel.getDroneControlMode();
+            String droneSpeed = droneModel.getDroneControlSpeed();
+            String droneAngle = droneModel.getDroneControlAngle();
+            String cmd = appendCommand(droneRequest,droneMode,droneSpeed,droneAngle);
+            if(droneSpeed.equals(lastSpeed)){
+                Logger.e("Not send request : lastSpeed : %s ",cmd);
+            }else{
+                SendData(cmd);
+                lastSpeed = droneSpeed;
+                Logger.d(cmd);
+            }
+            //SendData(droneModel.getJoyDirection());
+            //Logger.d(droneModel.getJoyDirection());
         }catch (Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    private String appendCommand(String req,String droneControlMode,String droneControlSpeed,String droneControlAngle) {
+        return req+","+droneControlMode+","+droneControlSpeed+","+droneControlAngle;
     }
 
     /**

@@ -19,6 +19,11 @@ public class DroneModel {
 	private Location locationPlayer;
 	private boolean isProviderEnabled;
 
+	private String droneControlMode;
+	private String droneControlSpeed;
+	private String droneControlAngle;
+	private String droneRequest;
+
 	/*******************************************************************
 	 * 
 	 * 1.Method Interface Listener
@@ -60,6 +65,7 @@ public class DroneModel {
 		void onLocationPlayer(DroneModel droneModel);
 		void onProviderEnabled(DroneModel droneModel);
 	}
+
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -161,8 +167,18 @@ public class DroneModel {
 		}
 	}
 
-	public void setJoyDirection(String joyDirection) {
-		this.joyDirection = joyDirection;
+//	public void setJoyDirection(String joyDirection) {
+//		this.joyDirection = joyDirection;
+//		if(onJoystickMoveListener != null){
+//			this.onJoystickMoveListener.onJoystickMoveListener(this);
+//		}
+//	}
+
+	public void setJoyDirection(String req,String droneControlMode,String droneControlSpeed,String droneControlAngle) {
+		this.droneRequest = req;
+		this.droneControlMode = droneControlMode;
+		this.droneControlSpeed = droneControlSpeed;
+		this.droneControlAngle = droneControlAngle;
 		if(onJoystickMoveListener != null){
 			this.onJoystickMoveListener.onJoystickMoveListener(this);
 		}
@@ -178,9 +194,6 @@ public class DroneModel {
 	public void setDroneTakeOff(String takeOff){
 		this.droneTakeOff = takeOff;
 	}
-
-
-
 
 	/*******************************************************************
 	 * 
@@ -237,5 +250,21 @@ public class DroneModel {
 
 	public String getDroneTakeOff(){
 		return droneTakeOff;
+	}
+
+	public String getDroneControlAngle() {
+		return droneControlAngle;
+	}
+
+	public String getDroneControlMode() {
+		return droneControlMode;
+	}
+
+	public String getDroneControlSpeed() {
+		return droneControlSpeed;
+	}
+
+	public String getDroneRequest(){
+		return droneRequest;
 	}
 }

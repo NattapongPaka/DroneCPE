@@ -23,6 +23,8 @@ public class DroneModel {
 	private String droneControlSpeed;
 	private String droneControlAngle;
 	private String droneRequest;
+	private int thottle;
+	private int yaw;
 
 	/*******************************************************************
 	 * 
@@ -66,6 +68,14 @@ public class DroneModel {
 		void onProviderEnabled(DroneModel droneModel);
 	}
 
+	public interface OnSeekBarThrottleListener {
+		void onThrottleChange(DroneModel droneModel);
+	}
+
+	public interface OnSeekBarYawListener {
+		void onYawChange(DroneModel droneModel);
+	}
+
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -80,6 +90,8 @@ public class DroneModel {
 	private OnResetListener onResetListener;
 	private OnTakeOffListener onTakeOffListener;
 	private OnGPSPlayerListener onGPSPlayerListener;
+	private OnSeekBarThrottleListener onSeekBarThrottleListener;
+	private OnSeekBarYawListener onSeekBarYawListener;
 	/*******************************************************************
 	 * 
 	 * 3.Method Listener
@@ -112,6 +124,14 @@ public class DroneModel {
 
 	public void setOnGPSPlayerListener(OnGPSPlayerListener onGPSPlayerListener){
 		this.onGPSPlayerListener = onGPSPlayerListener;
+	}
+
+	public void setOnSeekBarThrottleListener(OnSeekBarThrottleListener onSeekBarThrottleListener){
+		this.onSeekBarThrottleListener = onSeekBarThrottleListener;
+	}
+
+	public void setOnSeekBarYawListener(OnSeekBarYawListener onSeekBarYawListener){
+		this.onSeekBarYawListener = onSeekBarYawListener;
 	}
 	/*******************************************************************
 	 * 
@@ -198,6 +218,20 @@ public class DroneModel {
 		}
 	}
 
+	public void setThottle(int thottle){
+		this.thottle = thottle;
+		if(onSeekBarThrottleListener != null){
+			this.onSeekBarThrottleListener.onThrottleChange(this);
+		}
+	}
+
+	public void setYaw(int yaw){
+		this.yaw = yaw;
+		if(onSeekBarYawListener != null){
+			this.onSeekBarYawListener.onYawChange(this);
+		}
+	}
+
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
@@ -269,5 +303,13 @@ public class DroneModel {
 
 	public String getDroneRequest(){
 		return droneRequest;
+	}
+
+	public int getThottle() {
+		return thottle;
+	}
+
+	public int getYaw() {
+		return yaw;
 	}
 }

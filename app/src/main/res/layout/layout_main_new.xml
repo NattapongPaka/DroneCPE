@@ -354,7 +354,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:onClick="onClick"
-                android:text="TAKE OFF"
+                android:text="START"
                 android:textColor="@color/Black" />
 
             <ImageView

@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,8 +42,8 @@ import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
 import com.example.user.dronecpe.preference.UtilPreference;
-import com.example.user.dronecpe.qaction.ActionItem;
 import com.example.user.dronecpe.qaction.QuickAction;
+import com.example.user.dronecpe.util.LogUtil;
 import com.example.user.dronecpe.view.AccelerometerView;
 import com.example.user.dronecpe.view.DialogSetting;
 import com.example.user.dronecpe.view.JoystickView;
@@ -52,7 +51,6 @@ import com.example.user.dronecpe.view.VerticalSeekBar_Reverse;
 import com.github.niqdev.mjpeg.DisplayMode;
 import com.github.niqdev.mjpeg.Mjpeg;
 import com.github.niqdev.mjpeg.MjpegSurfaceView;
-import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +66,9 @@ public class MainActivity extends AppCompatActivity implements
         DroneModel.OnReadyListener,
         DroneModel.OnBatteryListener,
         DroneModel.OnSignalWifiListener,
-        DroneModel.OnGPSListener
-        , OnClickListener, QuickAction.OnActionItemClickListener, DroneModel.OnGPSPlayerListener {
+        DroneModel.OnGPSListener,
+        OnClickListener,
+        DroneModel.OnGPSPlayerListener {
 
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
@@ -389,8 +388,6 @@ public class MainActivity extends AppCompatActivity implements
         requestPermissionLocation();
         wifiApManager = new WifiApManager(this);
         startService(new Intent(this, GPSTracker.class));
-//        String pageURL = "http://192.168.43.252:8080/browserfs.html";
-//        webView.loadUrl(pageURL);
     }
 
     @Override
@@ -401,7 +398,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             Toast.makeText(getBaseContext(), "Double click back to exit", Toast.LENGTH_SHORT).show();
         }
-
         mBackPressed = System.currentTimeMillis();
     }
 
@@ -546,10 +542,12 @@ public class MainActivity extends AppCompatActivity implements
         return new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(seekBar.getId() == R.id.seekbarThrottle){
-                    Logger.d("seekBarThrottle %d", seekBar.getProgress());
-                }else if(seekBar.getId() == R.id.seekBarYaw){
-                    Logger.d("seekBarYaw %d", seekBar.getProgress());
+                if (seekBar.getId() == R.id.seekbarThrottle) {
+                    LogUtil.D("seekBarThrottle %d", seekBar.getProgress());
+                    mDroneModel.setThottle(seekBar.getProgress());
+                } else if (seekBar.getId() == R.id.seekBarYaw) {
+                    LogUtil.D("seekBarYaw %d", seekBar.getProgress());
+                    mDroneModel.setYaw(seekBar.getProgress());
                 }
             }
 
@@ -560,8 +558,14 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBar.setProgress(50);
-                Logger.d("onStopTrackingTouch %d", seekBar.getProgress());
+                if (seekBar.getId() == R.id.seekbarThrottle) {
+                    seekBar.setProgress(50);
+                    mDroneModel.setThottle(50);
+                } else if (seekBar.getId() == R.id.seekBarYaw) {
+                    seekBar.setProgress(50);
+                    mDroneModel.setYaw(50);
+                }
+                LogUtil.D("onStopTrackingTouch %d", seekBar.getProgress());
             }
         };
     }
@@ -605,30 +609,30 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.btnReset:
                 //Reset drone
-                mDroneModel.setDroneReset(DroneAPI.DRONE_RESET_VALUE);
+                mDroneModel.setDroneReset(DroneAPI.DRONE_RESET_DATA);
                 break;
 
             case R.id.btnTakeOff:
                 //Drone Takeoff / landing
                 Button button = (Button) v;
                 if (mDroneModel.getDroneTakeOff() != null) {
-                    if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_TAKEOFF_VALUE)) {
-                        button.setText(R.string.drone_taskOff);
+                    if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_START_DATA)) {
+                        button.setText(R.string.drone_start);
                         arrow_up3.setImageResource(R.drawable.ic_drone_up_dark);
                         arrow_up4.setImageResource(R.drawable.ic_drone_up_dark);
-                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_LANDING_VALUE);
+                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_STOP_DATA);
                     } else {
-                        button.setText(R.string.drone_landing);
+                        button.setText(R.string.drone_stop);
                         arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
                         arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
-                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF_VALUE);
+                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_START_DATA);
                     }
                 } else {
                     //Set first task off
-                    button.setText(R.string.drone_landing);
+                    button.setText(R.string.drone_start);
                     arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
                     arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
-                    mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF_VALUE);
+                    mDroneModel.setDroneTakeOff(DroneAPI.DRONE_START_DATA);
                 }
                 break;
         }
@@ -729,49 +733,41 @@ public class MainActivity extends AppCompatActivity implements
                         //Pitch forward
                         case JoystickView.FRONT:
                             directionTextViewRight.setText("front");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.FRONT_RIGHT:
                             directionTextViewRight.setText("front_right");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.LEFT_FRONT:
                             directionTextViewRight.setText("left_front");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Pitch backward
                         case JoystickView.RIGHT_BOTTOM:
                             directionTextViewRight.setText("right_bottom");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM:
                             directionTextViewRight.setText("bottom");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM_LEFT:
                             directionTextViewRight.setText("bottom_left");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll right
                         case JoystickView.RIGHT:
                             directionTextViewRight.setText("right");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_ROLL_RIGHT, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_ROLL_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll left
                         case JoystickView.LEFT:
                             directionTextViewRight.setText("left");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_ROLL_LEFT, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_ROLL_PARAM, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //None Action
@@ -783,42 +779,42 @@ public class MainActivity extends AppCompatActivity implements
         }
     };
 
-    /**
-     * Quick action event
-     *
-     * @param quickAction
-     * @param pos
-     * @param actionId
-     */
-    @Override
-    public void onItemClick(QuickAction quickAction, int pos, int actionId) {
-        ActionItem actionItem = quickAction.getActionItem(pos);
-        if (actionId == ID_OPEN) {
-            String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
-            int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
-            if (droneIP != null && !droneIP.isEmpty() && dronePort != 0 && dronePort > 0) {
-                //wifiApManager.setWifiApEnabled(null, true);
-                mDroneController = new DroneController(this, droneIP, dronePort);
-            } else {
-                Toast.makeText(this, "Please setting!!!", Toast.LENGTH_SHORT).show();
-                DialogSetting mDialogSetting = DialogSetting.newInstance();
-                mDialogSetting.show(getSupportFragmentManager(), "TAG");
-            }
-        }
-        if (actionId == ID_CLOSE) {
-            //wifiApManager.setWifiApEnabled(null, false);
-            if (mDroneController != null) {
-                mDroneController.stopSocketIncomeThread();
-            }
-        }
-        if (actionId == ID_SETTING) {
-            DialogSetting mDialogSetting = DialogSetting.newInstance();
-            mDialogSetting.show(getSupportFragmentManager(), "TAG");
-        }
-        if (actionId == ID_CAMERA) {
-            //TODO Connect camera
-        }
-    }
+//    /**
+//     * Quick action event
+//     *
+//     * @param quickAction
+//     * @param pos
+//     * @param actionId
+//     */
+//    @Override
+//    public void onItemClick(QuickAction quickAction, int pos, int actionId) {
+//        ActionItem actionItem = quickAction.getActionItem(pos);
+//        if (actionId == ID_OPEN) {
+//            String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
+//            int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
+//            if (droneIP != null && !droneIP.isEmpty() && dronePort != 0 && dronePort > 0) {
+//                //wifiApManager.setWifiApEnabled(null, true);
+//                mDroneController = new DroneController(this, droneIP, dronePort);
+//            } else {
+//                Toast.makeText(this, "Please setting!!!", Toast.LENGTH_SHORT).show();
+//                DialogSetting mDialogSetting = DialogSetting.newInstance();
+//                mDialogSetting.show(getSupportFragmentManager(), "TAG");
+//            }
+//        }
+//        if (actionId == ID_CLOSE) {
+//            //wifiApManager.setWifiApEnabled(null, false);
+//            if (mDroneController != null) {
+//                mDroneController.stopSocketIncomeThread();
+//            }
+//        }
+//        if (actionId == ID_SETTING) {
+//            DialogSetting mDialogSetting = DialogSetting.newInstance();
+//            mDialogSetting.show(getSupportFragmentManager(), "TAG");
+//        }
+//        if (actionId == ID_CAMERA) {
+//            //TODO Connect camera
+//        }
+//    }
 
 
     /**

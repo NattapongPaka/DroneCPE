@@ -3,7 +3,7 @@
 
     <string name="app_name">DroneCPE</string>
     <string name="drone_reset">RESET</string>
-    <string name="drone_taskOff">TASK OFF</string>
-    <string name="drone_landing">LANDING</string>
+    <string name="drone_start">START</string>
+    <string name="drone_stop">STOP</string>
 
 </resources>

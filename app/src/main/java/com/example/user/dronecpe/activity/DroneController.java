@@ -7,8 +7,8 @@ import android.util.Log;
 
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
-import com.example.user.dronecpe.view.DialogSetting;
-import com.orhanobut.logger.Logger;
+import com.example.user.dronecpe.util.CommandUtil;
+import com.example.user.dronecpe.util.LogUtil;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,12 +16,17 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.Executor;
 
 /**
  * Created by USER on 7/5/2559.
  */
-public class DroneController implements DroneModel.OnJoystickMoveListener,DroneModel.OnTakeOffListener,DroneModel.OnResetListener {
+public class DroneController implements
+        DroneModel.OnJoystickMoveListener,
+        DroneModel.OnTakeOffListener,
+        DroneModel.OnResetListener,
+        DroneModel.OnSeekBarThrottleListener,
+        DroneModel.OnSeekBarYawListener
+{
 
     private Context context;
     private String TAG = DroneController.class.getSimpleName();
@@ -64,6 +69,8 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
         mDroneModel.setOnJoystickMoveListener(this);
         mDroneModel.setOnTakeOffListener(this);
         mDroneModel.setOnResetListener(this);
+        mDroneModel.setOnSeekBarThrottleListener(this);
+        mDroneModel.setOnSeekBarYawListener(this);
     }
 
 //    public synchronized void initThread(){
@@ -71,8 +78,8 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
 //        mSocketOutcomeTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
 //    }
 
-    public synchronized void stopSocketIncomeThread(){
-        if(mThread != null) {
+    public synchronized void stopSocketIncomeThread() {
+        if (mThread != null) {
             mThread.setShouldStop(true);
             mThread.interrupt();
         }
@@ -85,37 +92,37 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
 
     @Override
     public void onJoystickMoveListener(DroneModel droneModel) {
-        try{
-            String droneRequest = droneModel.getDroneRequest();
+        try {
+            //String droneRequest = droneModel.getDroneRequest();
             String droneMode = droneModel.getDroneControlMode();
             String droneSpeed = droneModel.getDroneControlSpeed();
             String droneAngle = droneModel.getDroneControlAngle();
-            String cmd = appendCommand(droneRequest,droneMode,droneSpeed,droneAngle);
-            if(droneSpeed.equals(lastSpeed)){
-                Logger.e("Not send request : lastSpeed : %s ",cmd);
-            }else{
+            //String cmd = appendCommand(droneRequest,droneMode,droneSpeed,droneAngle);
+            String cmd = CommandUtil.getInstance().getDirectionProtocol(droneMode, droneSpeed, droneAngle);
+            if (droneSpeed.equals(lastSpeed)) {
+                LogUtil.E("Not send request : lastSpeed : %s ", cmd);
+            } else {
                 SendData(cmd);
                 lastSpeed = droneSpeed;
-                Logger.d(cmd);
+                LogUtil.D(cmd);
             }
             //SendData(droneModel.getJoyDirection());
-            //Logger.d(droneModel.getJoyDirection());
-        }catch (Exception ex){
+            //LogUtil.D(droneModel.getJoyDirection());
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private String appendCommand(String req,String droneControlMode,String droneControlSpeed,String droneControlAngle) {
-        return req+","+droneControlMode+","+droneControlSpeed+","+droneControlAngle;
-    }
+
 
     @Override
     public void onReset(DroneModel droneModel) {
         try {
-            String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_RESET,droneModel.getDroneReset(),"0");
-            Logger.d(cmd);
+            String cmd = CommandUtil.getInstance().getCMDProtocol(DroneAPI.DRONE_RESET_PARAM, droneModel.getDroneReset());
+            //String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_RESET,droneModel.getDroneReset(),"0");
+            LogUtil.D(cmd);
             SendData(cmd);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -123,8 +130,31 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
     @Override
     public void onTakeOff(DroneModel droneModel) {
         try {
-            String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_TAKEOFF,droneModel.getDroneTakeOff(),"0");
-            Logger.d(cmd);
+            String cmd = CommandUtil.getInstance().getCMDProtocol(DroneAPI.DRONE_ST_PARAM, droneModel.getDroneTakeOff());
+            //String cmd = appendCommand(DroneAPI.POST,DroneAPI.DRONE_TAKEOFF,droneModel.getDroneTakeOff(),"0");
+            LogUtil.D(cmd);
+            SendData(cmd);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onThrottleChange(DroneModel droneModel) {
+        try {
+            String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_THROTTLE_PARAM, droneModel.getThottle());
+            LogUtil.D(cmd);
+            SendData(cmd);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onYawChange(DroneModel droneModel) {
+        try {
+            String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_YAW_PARAM, droneModel.getYaw());
+            LogUtil.D(cmd);
             SendData(cmd);
         }catch (Exception ex){
             ex.printStackTrace();
@@ -161,11 +191,11 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
                 }
 
                 String msgResponse;
-                //Logger.d("Data available %d",dataInputStream.available());
-                if(dataInputStream.available() > 0) {
+                //LogUtil.D("Data available %d",dataInputStream.available());
+                if (dataInputStream.available() > 0) {
                     while ((msgResponse = dataInputStream.readLine()) != null) {
-                        //Logger.d("Data response %s",msgResponse);
-                        ParseCommand(msgResponse);
+                        //LogUtil.D("Data response %s",msgResponse);
+                        //ParseCommand(msgResponse);
                     }
                 }
 
@@ -225,7 +255,7 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
         @Override
         public void interrupt() {
             super.interrupt();
-            Log.d(TAG,"interrupt shouldStop:"+String.valueOf(shouldStop));
+            Log.d(TAG, "interrupt shouldStop:" + String.valueOf(shouldStop));
         }
 
         @Override
@@ -241,17 +271,17 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
             try {
                 serverSocket = new ServerSocket(PORT_IN);
                 while (!shouldStop) {
-                    Log.d(TAG,"shouldStop in while : "+String.valueOf(shouldStop)+":isInterrupt : "+String.valueOf(isInterrupted()));
+                    Log.d(TAG, "shouldStop in while : " + String.valueOf(shouldStop) + ":isInterrupt : " + String.valueOf(isInterrupted()));
                     socket = serverSocket.accept();
                     dataInputStream = new DataInputStream(socket.getInputStream());
                     String msgResponse = null;
                     while ((msgResponse = dataInputStream.readLine()) != null) {
-                        ParseCommand(msgResponse);
+                        //ParseCommand(msgResponse);
                     }
                     Log.i("msg_form_server", String.valueOf(msgResponse));
                 }
-                if(isInterrupted()){
-                    Log.d(TAG,"shouldStop : "+String.valueOf(shouldStop));
+                if (isInterrupted()) {
+                    Log.d(TAG, "shouldStop : " + String.valueOf(shouldStop));
                 }
             } catch (IOException e) {
                 Thread.currentThread().isInterrupted();
@@ -289,31 +319,31 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
      * Parse command before broadcast
      * @param msgIn
      */
-    private void ParseCommand(String msgIn) {
-        String[] msg1 = msgIn.split(":");
-        Log.i("msg_form_server", msgIn);
-        for (String m : msg1) {
-            String[] msg2 = m.split(",");
-            String KEY = msg2[0].trim();
-            String VALUE = msg2[1].trim();
-
-            if (KEY.equals(DroneAPI.DRONE_READY)) {
-                Log.i("DRONE_READY", VALUE);
-                mDroneModel.setReady(VALUE);
-            } else if (KEY.equals(DroneAPI.DRONE_BATTERY)) {
-                Log.i("DRONE_BATTERY", VALUE);
-                mDroneModel.setBattery(VALUE);
-            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI)) {
-                Log.i("DRONE_SIGNAL_WIFI", VALUE);
-                mDroneModel.setSignalWifi(VALUE);
-            } else if (KEY.equals(DroneAPI.DRONE_GPS)) {
-                Log.i("DRONE_GPS", VALUE);
-                mDroneModel.setGps(VALUE);
-            }
-            //TODO parse gyro
-            Log.i("loop_msg_form_server", KEY + "->" + VALUE);
-        }
-    }
+//    private void ParseCommand(String msgIn) {
+//        String[] msg1 = msgIn.split(":");
+//        Log.i("msg_form_server", msgIn);
+//        for (String m : msg1) {
+//            String[] msg2 = m.split(",");
+//            String KEY = msg2[0].trim();
+//            String VALUE = msg2[1].trim();
+//
+//            if (KEY.equals(DroneAPI.DRONE_READY)) {
+//                Log.i("DRONE_READY", VALUE);
+//                mDroneModel.setReady(VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_BATTERY)) {
+//                Log.i("DRONE_BATTERY", VALUE);
+//                mDroneModel.setBattery(VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI)) {
+//                Log.i("DRONE_SIGNAL_WIFI", VALUE);
+//                mDroneModel.setSignalWifi(VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_GPS)) {
+//                Log.i("DRONE_GPS", VALUE);
+//                mDroneModel.setGps(VALUE);
+//            }
+//            //TODO parse gyro
+//            Log.i("loop_msg_form_server", KEY + "->" + VALUE);
+//        }
+//    }
 
     /**
      * Get location
@@ -357,4 +387,9 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
 //            }
 //        });
 //    }
+//
+//   private String appendCommand(String req, String droneControlMode, String droneControlSpeed, String droneControlAngle) {
+//        return req + "," + droneControlMode + "," + droneControlSpeed + "," + droneControlAngle;
+//    }
+
 }

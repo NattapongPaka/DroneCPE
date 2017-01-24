@@ -66,10 +66,10 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
         mDroneModel.setOnResetListener(this);
     }
 
-    public synchronized void initThread(){
-        SocketOutcomeTask mSocketOutcomeTask = new SocketOutcomeTask(this.dstAddress, dstPort, "initSocket");
-        mSocketOutcomeTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-    }
+//    public synchronized void initThread(){
+//        SocketOutcomeTask mSocketOutcomeTask = new SocketOutcomeTask(this.dstAddress, dstPort, "initSocket");
+//        mSocketOutcomeTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+//    }
 
     public synchronized void stopSocketIncomeThread(){
         if(mThread != null) {
@@ -310,6 +310,7 @@ public class DroneController implements DroneModel.OnJoystickMoveListener,DroneM
                 Log.i("DRONE_GPS", VALUE);
                 mDroneModel.setGps(VALUE);
             }
+            //TODO parse gyro
             Log.i("loop_msg_form_server", KEY + "->" + VALUE);
         }
     }

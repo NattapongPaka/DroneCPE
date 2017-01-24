@@ -47,22 +47,22 @@
                 android:id="@+id/btnSetting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
-                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:onClick="onClick"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_settings_grey_600_48dp" />
 
             <ImageButton
                 android:id="@+id/btnInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
-                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:onClick="onClick"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_info_outline_grey_600_48dp" />
 
             <RelativeLayout
@@ -109,18 +109,18 @@
             </RelativeLayout>
 
             <!--<ImageButton-->
-                <!--android:id="@+id/btnCameraMenu"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_marginRight="2dp"-->
-                <!--android:layout_marginTop="2dp"-->
-                <!--android:layout_marginBottom="2dp"-->
-                <!--android:background="@drawable/circle_button"-->
-                <!--android:onClick="onClick"-->
-                <!--android:src="@drawable/ic_action_camera"-->
-                <!--android:visibility="gone" />-->
+            <!--android:id="@+id/btnCameraMenu"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_marginRight="2dp"-->
+            <!--android:layout_marginTop="2dp"-->
+            <!--android:layout_marginBottom="2dp"-->
+            <!--android:background="@drawable/circle_button"-->
+            <!--android:onClick="onClick"-->
+            <!--android:src="@drawable/ic_action_camera"-->
+            <!--android:visibility="gone" />-->
 
             <LinearLayout
                 android:id="@+id/lyWifi"
@@ -205,6 +205,12 @@
                 android:layout_height="match_parent"
                 stream:type="stream_default" />
 
+            <!--<WebView-->
+            <!--android:id="@+id/webView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+
+
         </RelativeLayout>
 
         <RelativeLayout
@@ -227,7 +233,7 @@
                 android:id="@+id/joystickView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"></com.example.user.dronecpe.view.JoystickView>
+                android:layout_alignParentLeft="true" />
 
             <com.example.user.dronecpe.view.JoystickView
                 android:id="@+id/joystickView2"
@@ -240,7 +246,26 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true" />
+                android:layout_centerHorizontal="true"
+                android:visibility="gone" />
+
+            <com.example.user.dronecpe.view.VerticalSeekBar_Reverse
+                android:id="@+id/seekbar_reverse"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progressDrawable="@drawable/custom_progressbar"
+                android:progress="50"
+                android:rotation="180" />
+
+            <SeekBar
+                android:layout_width="250dp"
+                android:layout_height="20dp"
+                android:layout_alignBottom="@+id/joystickView2"
+                android:layout_alignRight="@+id/joystickView2"
+                android:max="100"
+                android:progressDrawable="@drawable/custom_progressbar"
+                android:progress="50" />
 
         </RelativeLayout>
     </FrameLayout>
@@ -262,11 +287,11 @@
                 android:id="@+id/arrow_up3"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_drone_up_dark"
                 android:layout_centerVertical="true"
-                android:background="@android:color/transparent"
                 android:layout_toLeftOf="@+id/btnTakeOff"
-                android:scaleType="fitCenter" />
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_drone_up_dark" />
 
             <Button
                 android:id="@+id/btnTakeOff"
@@ -285,9 +310,9 @@
                 android:layout_height="50dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/btnTakeOff"
-                android:src="@drawable/ic_drone_up_dark"
                 android:background="@android:color/transparent"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_drone_up_dark" />
         </RelativeLayout>
 
         <!--Left-->

@@ -233,8 +233,7 @@ public class JoystickView extends View implements Runnable {
     public boolean onTouchEvent(MotionEvent event) {
         xPosition = (int) event.getX();
         yPosition = (int) event.getY();
-        double abs = Math.sqrt((xPosition - centerX) * (xPosition - centerX)
-                + (yPosition - centerY) * (yPosition - centerY));
+        double abs = Math.sqrt((xPosition - centerX) * (xPosition - centerX) + (yPosition - centerY) * (yPosition - centerY));
         if (abs > joystickRadius) {
             xPosition = (int) ((xPosition - centerX) * joystickRadius / abs + centerX);
             yPosition = (int) ((yPosition - centerY) * joystickRadius / abs + centerY);

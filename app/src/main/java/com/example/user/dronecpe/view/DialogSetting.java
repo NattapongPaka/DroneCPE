@@ -37,9 +37,18 @@ public class DialogSetting extends AppCompatDialogFragment {
     public static final String CAMERA_IP_ID = "2";
     public static final String CAMERA_PORT_ID = "3";
 
+    public IDialogSetting iDialogSetting;
+
+    public interface IDialogSetting{
+        void onSettingSuccess();
+    }
+
+    public void setOnDialogSettingClickListener(IDialogSetting iDialogSetting){
+        this.iDialogSetting = iDialogSetting;
+    }
+
     public static DialogSetting newInstance() {
-        DialogSetting frag = new DialogSetting();
-        return frag;
+        return new DialogSetting();
     }
 
     @Override
@@ -91,6 +100,9 @@ public class DialogSetting extends AppCompatDialogFragment {
                     UtilPreference.getInstance().setSharedPreference(settingModel.getId(), settingObject);
                     Log.d(TAG, "onClick : " + settingObject);
                 }
+            }
+            if(iDialogSetting != null){
+                iDialogSetting.onSettingSuccess();
             }
             dismiss();
         }

@@ -1,16 +1,13 @@
 package com.example.user.dronecpe.activity;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -20,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -29,10 +27,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.user.dronecpe.R;
 import com.example.user.dronecpe.hotspot.WifiApManager;
@@ -45,51 +48,142 @@ import com.example.user.dronecpe.qaction.QuickAction;
 import com.example.user.dronecpe.view.AccelerometerView;
 import com.example.user.dronecpe.view.DialogSetting;
 import com.example.user.dronecpe.view.JoystickView;
+import com.example.user.dronecpe.view.VerticalSeekBar_Reverse;
 import com.github.niqdev.mjpeg.DisplayMode;
 import com.github.niqdev.mjpeg.Mjpeg;
-import com.github.niqdev.mjpeg.MjpegView;
+import com.github.niqdev.mjpeg.MjpegSurfaceView;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements DroneModel.OnGyroSensorListener, DroneModel.OnReadyListener, DroneModel.OnBatteryListener, DroneModel.OnSignalWifiListener, DroneModel.OnGPSListener
+
+public class MainActivity extends AppCompatActivity implements
+        DroneModel.OnGyroSensorListener,
+        DroneModel.OnReadyListener,
+        DroneModel.OnBatteryListener,
+        DroneModel.OnSignalWifiListener,
+        DroneModel.OnGPSListener
         , OnClickListener, QuickAction.OnActionItemClickListener, DroneModel.OnGPSPlayerListener {
+
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
-    private ImageView arrow_up3;
-    private ImageView arrow_up4;
+    @BindView(R.id.imgGPS)
+    ImageView imgGPS;
+    @BindView(R.id.txtGPS)
+    TextView txtGPS;
+    @BindView(R.id.lyGPS)
+    LinearLayout lyGPS;
+    @BindView(R.id.btnSetting)
+    ImageButton btnSetting;
+    @BindView(R.id.btnInfo)
+    ImageButton btnInfo;
+    @BindView(R.id.arrow_up1)
+    ImageButton arrowUp1;
+    @BindView(R.id.btnReset)
+    Button btnReset;
+    @BindView(R.id.arrow_up2)
+    ImageButton arrowUp2;
+    @BindView(R.id.lyReset)
+    RelativeLayout lyReset;
+    @BindView(R.id.txtWifiSignal)
+    TextView txtWifiSignal;
+    @BindView(R.id.lyWifi)
+    LinearLayout lyWifi;
+    @BindView(R.id.txtBettery)
+    TextView txtBettery;
+    @BindView(R.id.lyBattery)
+    LinearLayout lyBattery;
+    @BindView(R.id.txtStatus)
+    TextView txtStatus;
+    @BindView(R.id.mjpegViewDefault)
+    MjpegSurfaceView mjpegView;
+    @BindView(R.id.txtLatLng)
+    TextView txtLatLng;
+    //    @BindView(R.id.joystickView1)
+//    JoystickView joystickLeft;
+    @BindView(R.id.joystickView2)
+    JoystickView joystickRight;
+    @BindView(R.id.gyroSensorView)
+    AccelerometerView gyroSensorView;
+    @BindView(R.id.seekbarThrottle)
+    VerticalSeekBar_Reverse seekbarThrottle;
+    @BindView(R.id.seekBarYaw)
+    SeekBar seekBarYaw;
+    @BindView(R.id.lyFirst)
+    ConstraintLayout lyFirst;
+    @BindView(R.id.arrow_up3)
+    ImageView arrow_up3;
+    @BindView(R.id.btnTakeOff)
+    Button btnTakeOff;
+    @BindView(R.id.arrow_up4)
+    ImageView arrow_up4;
+    @BindView(R.id.lyTakeOff)
+    RelativeLayout lyTakeOff;
+    @BindView(R.id.txt1)
+    TextView angleTextViewLeft;
+    @BindView(R.id.txt2)
+    TextView powerTextViewLeft;
+    @BindView(R.id.txt3)
+    TextView directionTextViewLeft;
+    @BindView(R.id.txt4)
+    TextView angleTextViewRight;
+    @BindView(R.id.txt5)
+    TextView powerTextViewRight;
+    @BindView(R.id.txt6)
+    TextView directionTextViewRight;
+    @BindView(R.id.imgMyIPStatus)
+    ImageView imgMyIPStatus;
+    @BindView(R.id.imgDroneIPStatus)
+    ImageView imgDroneIPStatus;
+    @BindView(R.id.txtStatusDrone)
+    TextView txtStatusDrone;
+    @BindView(R.id.topPanel)
+    RelativeLayout topPanel;
+    @BindView(R.id.btnCameraControl)
+    ToggleButton btnCameraControl;
+    @BindView(R.id.bottomPanel)
+    RelativeLayout bottomPanel;
 
-    private TextView angleTextViewLeft;
-    private TextView powerTextViewLeft;
-    private TextView directionTextViewLeft;
 
-    private TextView angleTextViewRight;
-    private TextView powerTextViewRight;
-    private TextView directionTextViewRight;
+//    @BindView(R.id.gyroSensorView)
+//    AccelerometerView mAccelerometer;
 
-    private TextView txtLatLng;
-    private TextView txtGPS;
-    private ImageView imgGPS;
+//    private ImageView arrow_up3;
+//    private ImageView arrow_up4;
+//
+//    private TextView angleTextViewLeft;
+//    private TextView powerTextViewLeft;
+//    private TextView directionTextViewLeft;
+//
+//    private TextView angleTextViewRight;
+//    private TextView powerTextViewRight;
+//    private TextView directionTextViewRight;
+//
+//    private TextView txtLatLng;
+//    private TextView txtGPS;
+//    private ImageView imgGPS;
+//
+//    private VerticalSeekBar_Reverse seekBar;
+//    private TextView txtBettery;
+//    private TextView txtStatus;
+//    private TextView txtWifiSignal;
+//
+//    private JoystickView joystickLeft;
+//    private JoystickView joystickRight;
+//    private ImageButton btnSetting;
 
-    private TextView txtBettery;
-    private TextView txtStatus;
-    private TextView txtWifiSignal;
-    // Importing also other views
-    private JoystickView joystickLeft;
-    private JoystickView joystickRight;
-    private AccelerometerView mAccelerometer;
-    private float[] acceleration = new float[3];
-
-    private volatile Thread mThread;
-    private Runnable mTimer1;
-    private Handler mHandler = new Handler();
-
+    //    private AccelerometerView mAccelerometer;
     private SensorManager mSensorManager;
 
-    private ImageButton btnSetting;
+    private float[] acceleration = new float[3];
+    private Runnable mTimer1;
+    private Handler mHandler = new Handler();
     private QuickAction mQuickAction;
 
     private static final int ID_OPEN = 1;
@@ -108,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 //    private static final String SERVER_IP = "192.168.43.195";
 
     private WifiApManager wifiApManager;
-    private MjpegView mjpegView;
+//    private MjpegView mjpegView;
 
     private DroneController mDroneController;
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
@@ -132,7 +226,11 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 
     @Override
     protected void onDestroy() {
-        if(wifiApManager != null){
+        if (mjpegView != null && mjpegView.isStreaming()) {
+            mjpegView.stopPlayback();
+            mjpegView.freeCameraMemory();
+        }
+        if (wifiApManager != null) {
             wifiApManager.setWifiApEnabled(null, false);
         }
         if (mSensorManager != null) {
@@ -153,15 +251,19 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     @Override
     public void onPause() {
         super.onPause();
-        mjpegView.stopPlayback();
-        mSensorManager.unregisterListener(mySensorEventListener);
+        if (mjpegView != null) {
+            mjpegView.stopPlayback();
+        }
+        if (mSensorManager != null) {
+            mSensorManager.unregisterListener(mySensorEventListener);
+        }
         mHandler.removeCallbacks(mTimer1);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //loadIpCam();
+        loadIpCam();
         mTimer1 = new Runnable() {
             @Override
             public void run() {
@@ -215,6 +317,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 
     /**
      * Check permission never ask again
+     *
      * @param permissionsList
      * @param permission
      * @return
@@ -286,6 +389,8 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         requestPermissionLocation();
         wifiApManager = new WifiApManager(this);
         startService(new Intent(this, GPSTracker.class));
+//        String pageURL = "http://192.168.43.252:8080/browserfs.html";
+//        webView.loadUrl(pageURL);
     }
 
     @Override
@@ -312,44 +417,48 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     private void loadIpCam() {
         String userName = "";
         String pass = "";
-        String url = "";
+
+        String hostname = "http://trackfield.webcam.oregonstate.edu"; // http://trackfield.webcam.oregonstate.edu//http://128.193.182.123
+        String url = hostname + "/axis-cgi/mjpg/video.cgi?resolution=800x600&amp%3bdummy=1333689998337";
         int TIMEOUT = 5;
+
         Mjpeg.newInstance()
-                .credential(userName, pass)
+                //.credential(userName, pass)
                 .open(url, TIMEOUT)
                 .subscribe(
                         inputStream -> {
                             mjpegView.setSource(inputStream);
-                            mjpegView.setDisplayMode(calculateDisplayMode());
+                            mjpegView.setDisplayMode(MainActivity.this.calculateDisplayMode());
                             mjpegView.showFps(true);
                         },
                         throwable -> {
-                            Log.e(getClass().getSimpleName(), "mjpeg error", throwable);
-                            Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+                            Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
+                            Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
                         });
+
     }
 
     /**
      * Ref http://github.com/lorensiuswlt/NewQuickAction
      * Setting
      */
-    public void Setting() {
-        ActionItem Open = new ActionItem(ID_OPEN, "OpenHotspot", ActivityCompat.getDrawable(this, R.drawable.ic_wifi_tethering_grey_600_48dp));
-        ActionItem Close = new ActionItem(ID_CLOSE, "CloseHotspot", ActivityCompat.getDrawable(this, R.drawable.ic_portable_wifi_off_grey_600_48dp));
-        //ActionItem Connect = new ActionItem(ID_CONNECT, "Connect", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        //ActionItem Rec = new ActionItem(ID_VDO, "Rec", getResources().getDrawable(R.drawable.ic_wifi_icon));
-        ActionItem Camera = new ActionItem(ID_CAMERA, "Camera", ActivityCompat.getDrawable(this, R.drawable.ic_linked_camera_grey_600_48dp));
-        ActionItem Setting = new ActionItem(ID_SETTING, "Setting", ActivityCompat.getDrawable(this, R.drawable.ic_edit_grey_600_48dp));
-
-        mQuickAction = new QuickAction(this);
-        mQuickAction.addActionItem(Open);
-        mQuickAction.addActionItem(Close);
-//        mQuickAction.addActionItem(Connect);
-//        mQuickAction.addActionItem(Rec);
-        mQuickAction.addActionItem(Camera);
-        mQuickAction.addActionItem(Setting);
-        mQuickAction.setOnActionItemClickListener(this);
-    }
+//    public void Setting() {
+//        //ActionItem Open = new ActionItem(ID_OPEN, "Connect", ActivityCompat.getDrawable(this, R.drawable.ic_wifi_tethering_grey_600_48dp));
+//        //ActionItem Close = new ActionItem(ID_CLOSE, "Close", ActivityCompat.getDrawable(this, R.drawable.ic_portable_wifi_off_grey_600_48dp));
+//        //ActionItem Connect = new ActionItem(ID_CONNECT, "Connect", getResources().getDrawable(R.drawable.ic_wifi_icon));
+//        //ActionItem Rec = new ActionItem(ID_VDO, "Rec", getResources().getDrawable(R.drawable.ic_wifi_icon));
+//        //ActionItem Camera = new ActionItem(ID_CAMERA, "Camera", ActivityCompat.getDrawable(this, R.drawable.ic_linked_camera_grey_600_48dp));
+//        //ActionItem Setting = new ActionItem(ID_SETTING, "Setting", ActivityCompat.getDrawable(this, R.drawable.ic_edit_grey_600_48dp));
+//
+//        mQuickAction = new QuickAction(this);
+////        mQuickAction.addActionItem(Open);
+////        mQuickAction.addActionItem(Close);
+////        mQuickAction.addActionItem(Connect);
+////        mQuickAction.addActionItem(Rec);
+////        mQuickAction.addActionItem(Camera);
+////        mQuickAction.addActionItem(Setting);
+//        mQuickAction.setOnActionItemClickListener(this);
+//    }
 
     /**
      * All Initializing
@@ -357,36 +466,51 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     public void InitLayout() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.layout_main);
+        setContentView(R.layout.layout_main_new);
+        ButterKnife.bind(this);
     }
 
     public void InitView() {
-        arrow_up3 = (ImageView) findViewById(R.id.arrow_up3);
-        arrow_up4 = (ImageView) findViewById(R.id.arrow_up4);
-        txtGPS = (TextView) findViewById(R.id.txtGPS);
-        txtLatLng = (TextView) findViewById(R.id.txtLatLng);
-        imgGPS = (ImageView) findViewById(R.id.imgGPS);
-        mAccelerometer = (AccelerometerView) findViewById(R.id.gyroSensorView);
-        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        mSensorManager.registerListener(mySensorEventListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        angleTextViewLeft = (TextView) findViewById(R.id.txt1);
-        powerTextViewLeft = (TextView) findViewById(R.id.txt2);
-        directionTextViewLeft = (TextView) findViewById(R.id.txt3);
-        angleTextViewRight = (TextView) findViewById(R.id.txt4);
-        powerTextViewRight = (TextView) findViewById(R.id.txt5);
-        directionTextViewRight = (TextView) findViewById(R.id.txt6);
-        txtStatus = (TextView) findViewById(R.id.txtStatus);
-        btnSetting = (ImageButton) findViewById(R.id.btnSetting);
-        joystickLeft = (JoystickView) findViewById(R.id.joystickView1);
-        joystickLeft.setJoyID(JoystickView.JOY_LEFT);
-        joystickRight = (JoystickView) findViewById(R.id.joystickView2);
+        seekbarThrottle.setOnSeekBarChangeListener(getOnSeekBarChangeListener());
+        seekBarYaw.setOnSeekBarChangeListener(getOnSeekBarChangeListener());
         joystickRight.setJoyID(JoystickView.JOY_RIGHT);
-        txtWifiSignal = (TextView) findViewById(R.id.txtWifiSignal);
-        txtBettery = (TextView) findViewById(R.id.txtBettery);
-        mjpegView = (MjpegView) findViewById(R.id.mjpegViewDefault);
         btnSetting.setOnClickListener(this);
-        Setting();
     }
+
+//    public void InitView() {
+//        seekBar = (VerticalSeekBar_Reverse) findViewById(R.id.seekbar_reverse);
+//        arrow_up3 = (ImageView) findViewById(R.id.arrow_up3);
+//        arrow_up4 = (ImageView) findViewById(R.id.arrow_up4);
+//        txtGPS = (TextView) findViewById(R.id.txtGPS);
+//        txtLatLng = (TextView) findViewById(R.id.txtLatLng);
+//        imgGPS = (ImageView) findViewById(R.id.imgGPS);
+//        mAccelerometer = (AccelerometerView) findViewById(R.id.gyroSensorView);
+//        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+//        mSensorManager.registerListener(mySensorEventListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+//        angleTextViewLeft = (TextView) findViewById(R.id.txt1);
+//        powerTextViewLeft = (TextView) findViewById(R.id.txt2);
+//        directionTextViewLeft = (TextView) findViewById(R.id.txt3);
+//        angleTextViewRight = (TextView) findViewById(R.id.txt4);
+//        powerTextViewRight = (TextView) findViewById(R.id.txt5);
+//        directionTextViewRight = (TextView) findViewById(R.id.txt6);
+//        txtStatus = (TextView) findViewById(R.id.txtStatus);
+//        btnSetting = (ImageButton) findViewById(R.id.btnSetting);
+//        joystickLeft = (JoystickView) findViewById(R.id.joystickView1);
+//        joystickLeft.setJoyID(JoystickView.JOY_LEFT);
+//        joystickRight = (JoystickView) findViewById(R.id.joystickView2);
+//        joystickRight.destroyDrawingCache();
+//        joystickRight.setJoyID(JoystickView.JOY_RIGHT);
+//        txtWifiSignal = (TextView) findViewById(R.id.txtWifiSignal);
+//        txtBettery = (TextView) findViewById(R.id.txtBettery);
+//        mjpegView = (MjpegView) findViewById(R.id.mjpegViewDefault);
+//        btnSetting.setOnClickListener(this);
+//        Setting();
+//        webView = (WebView) findViewById(R.id.webView);
+//        webView.setWebChromeClient(new WebChromeClient());
+//        webView.getSettings().setPluginState(WebSettings.PluginState.ON_DEMAND);
+//        webView.getSettings().setJavaScriptEnabled(true);
+//    }
+
 
     public void InitEvent() {
         // Register Model Listener
@@ -397,7 +521,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         mDroneModel.setOnGPSListener(this);
         mDroneModel.setOnGPSPlayerListener(this);
         // Register Joy Listener
-        joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
+        //joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
         joystickRight.setOnJoystickMoveListener(onJoystickMoveListenerRight, JoystickView.DEFAULT_LOOP_INTERVAL);
     }
 
@@ -417,6 +541,31 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         }
     };
 
+    @NonNull
+    private SeekBar.OnSeekBarChangeListener getOnSeekBarChangeListener() {
+        return new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(seekBar.getId() == R.id.seekbarThrottle){
+                    Logger.d("seekBarThrottle %d", seekBar.getProgress());
+                }else if(seekBar.getId() == R.id.seekBarYaw){
+                    Logger.d("seekBarYaw %d", seekBar.getProgress());
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekBar.setProgress(50);
+                Logger.d("onStopTrackingTouch %d", seekBar.getProgress());
+            }
+        };
+    }
+
     /**
      * All button event
      *
@@ -426,8 +575,19 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnSetting:
-                mQuickAction.show(v);
-                mQuickAction.setAnimStyle(QuickAction.ANIM_GROW_FROM_LEFT);
+                //mQuickAction.show(v);
+                //mQuickAction.setAnimStyle(QuickAction.ANIM_GROW_FROM_LEFT);
+                DialogSetting mDialogSetting = DialogSetting.newInstance();
+                mDialogSetting.show(getSupportFragmentManager(), "TAG");
+                mDialogSetting.setOnDialogSettingClickListener(new DialogSetting.IDialogSetting() {
+                    @Override
+                    public void onSettingSuccess() {
+                        String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
+                        int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
+                        mDroneController = new DroneController(MainActivity.this, droneIP, dronePort);
+                        Toast.makeText(MainActivity.this, "Connecting!!!", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
 
 //            case R.id.btnCameraMenu:
@@ -451,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
             case R.id.btnTakeOff:
                 //Drone Takeoff / landing
                 Button button = (Button) v;
-                if(mDroneModel.getDroneTakeOff() != null) {
+                if (mDroneModel.getDroneTakeOff() != null) {
                     if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_TAKEOFF_VALUE)) {
                         button.setText(R.string.drone_taskOff);
                         arrow_up3.setImageResource(R.drawable.ic_drone_up_dark);
@@ -463,7 +623,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
                         arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
                         mDroneModel.setDroneTakeOff(DroneAPI.DRONE_TAKEOFF_VALUE);
                     }
-                }else{
+                } else {
                     //Set first task off
                     button.setText(R.string.drone_landing);
                     arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
@@ -481,72 +641,72 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
      * Yaw left
      * Yaw right
      *******************************************************************************/
-    private JoystickView.OnJoystickMoveListener onJoystickMoveListenerLeft = new JoystickView.OnJoystickMoveListener() {
-        String cmd;
-
-        @Override
-        public void onValueChanged(int angle, int power, int direction) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    angleTextViewLeft.setText(" " + String.valueOf(angle) + "°");
-                    powerTextViewLeft.setText(" " + String.valueOf(power) + "%");
-                    switch (direction) {
-                        //Throttle high
-                        case JoystickView.FRONT:
-                            directionTextViewLeft.setText("front");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_UP,String.valueOf(power),String.valueOf(angle));
-                            break;
-                        case JoystickView.FRONT_RIGHT:
-                            directionTextViewLeft.setText("front_right");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_UP,String.valueOf(power),String.valueOf(angle));
-                            break;
-                        case JoystickView.LEFT_FRONT:
-                            directionTextViewLeft.setText("left_front");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_UP,String.valueOf(power),String.valueOf(angle));
-                            break;
-
-                        //Throttle low
-                        case JoystickView.RIGHT_BOTTOM:
-                            directionTextViewLeft.setText("right_bottom");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_DOWN,String.valueOf(power),String.valueOf(angle));
-                            break;
-                        case JoystickView.BOTTOM:
-                            directionTextViewLeft.setText("bottom");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_DOWN,String.valueOf(power),String.valueOf(angle));
-                            break;
-                        case JoystickView.BOTTOM_LEFT:
-                            directionTextViewLeft.setText("bottom_left");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_THROTTLE_DOWN,String.valueOf(power),String.valueOf(angle));
-                            break;
-
-                        //Yaw right
-                        case JoystickView.RIGHT:
-                            directionTextViewLeft.setText("right");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_YAW_RIGHT,String.valueOf(power),String.valueOf(angle));
-                            break;
-
-                        //Yaw left
-                        case JoystickView.LEFT:
-                            directionTextViewLeft.setText("left");
-                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_YAW_LEFT,String.valueOf(power),String.valueOf(angle));
-                            break;
-
-                        default:
-                            directionTextViewLeft.setText("center");
-                    }
-                }
-            });
-        }
-    };
+//    private JoystickView.OnJoystickMoveListener onJoystickMoveListenerLeft = new JoystickView.OnJoystickMoveListener() {
+//        String cmd;
+//
+//        @Override
+//        public void onValueChanged(int angle, int power, int direction) {
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    angleTextViewLeft.setText(" " + String.valueOf(angle) + "°");
+//                    powerTextViewLeft.setText(" " + String.valueOf(power) + "%");
+//                    switch (direction) {
+//                        //Throttle high
+//                        case JoystickView.FRONT:
+//                            directionTextViewLeft.setText("front");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_UP, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//                        case JoystickView.FRONT_RIGHT:
+//                            directionTextViewLeft.setText("front_right");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_UP, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//                        case JoystickView.LEFT_FRONT:
+//                            directionTextViewLeft.setText("left_front");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_UP, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//
+//                        //Throttle low
+//                        case JoystickView.RIGHT_BOTTOM:
+//                            directionTextViewLeft.setText("right_bottom");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_DOWN, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//                        case JoystickView.BOTTOM:
+//                            directionTextViewLeft.setText("bottom");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_DOWN, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//                        case JoystickView.BOTTOM_LEFT:
+//                            directionTextViewLeft.setText("bottom_left");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_THROTTLE_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_THROTTLE_DOWN, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//
+//                        //Yaw right
+//                        case JoystickView.RIGHT:
+//                            directionTextViewLeft.setText("right");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_YAW_RIGHT, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//
+//                        //Yaw left
+//                        case JoystickView.LEFT:
+//                            directionTextViewLeft.setText("left");
+//                            //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_YAW_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
+//                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_YAW_LEFT, String.valueOf(power), String.valueOf(angle));
+//                            break;
+//
+//                        default:
+//                            directionTextViewLeft.setText("center");
+//                    }
+//                }
+//            });
+//        }
+//    };
 
     /******************************************************************************
      * Joy stick right event
@@ -570,48 +730,48 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
                         case JoystickView.FRONT:
                             directionTextViewRight.setText("front");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_UP,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.FRONT_RIGHT:
                             directionTextViewRight.setText("front_right");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_UP,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.LEFT_FRONT:
                             directionTextViewRight.setText("left_front");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_UP + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_UP,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_UP, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Pitch backward
                         case JoystickView.RIGHT_BOTTOM:
                             directionTextViewRight.setText("right_bottom");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_DOWN,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM:
                             directionTextViewRight.setText("bottom");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_DOWN,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM_LEFT:
                             directionTextViewRight.setText("bottom_left");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_PITCH_DOWN + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_PITCH_DOWN,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_PITCH_DOWN, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll right
                         case JoystickView.RIGHT:
                             directionTextViewRight.setText("right");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_RIGHT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_ROLL_RIGHT,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_ROLL_RIGHT, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll left
                         case JoystickView.LEFT:
                             directionTextViewRight.setText("left");
                             //cmd = DroneAPI.POST + "," + DroneAPI.DRONE_ROLL_LEFT + "," + String.valueOf(power) + "," + String.valueOf(angle);
-                            mDroneModel.setJoyDirection(DroneAPI.POST,DroneAPI.DRONE_ROLL_LEFT,String.valueOf(power),String.valueOf(angle));
+                            mDroneModel.setJoyDirection(DroneAPI.POST, DroneAPI.DRONE_ROLL_LEFT, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //None Action
@@ -636,7 +796,6 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         if (actionId == ID_OPEN) {
             String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
             int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
-
             if (droneIP != null && !droneIP.isEmpty() && dronePort != 0 && dronePort > 0) {
                 //wifiApManager.setWifiApEnabled(null, true);
                 mDroneController = new DroneController(this, droneIP, dronePort);
@@ -648,13 +807,16 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
         }
         if (actionId == ID_CLOSE) {
             //wifiApManager.setWifiApEnabled(null, false);
-            if(mDroneController != null) {
+            if (mDroneController != null) {
                 mDroneController.stopSocketIncomeThread();
             }
         }
         if (actionId == ID_SETTING) {
             DialogSetting mDialogSetting = DialogSetting.newInstance();
             mDialogSetting.show(getSupportFragmentManager(), "TAG");
+        }
+        if (actionId == ID_CAMERA) {
+            //TODO Connect camera
         }
     }
 
@@ -668,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
     public void onGyroSensorChange(DroneModel droneModel) {
         try {
             float[] mValue = droneModel.getAcceleration();
-            mAccelerometer.updateRotation(mValue);
+            //mAccelerometer.updateRotation(mValue);
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -854,7 +1016,7 @@ public class MainActivity extends AppCompatActivity implements DroneModel.OnGyro
 //            }
 //        }
 //    }
-     /******************************************************************************
+    /******************************************************************************
      // Sensor Register un use
      //*******************************************************************************/
 //    public void GyroSensorRegister() {

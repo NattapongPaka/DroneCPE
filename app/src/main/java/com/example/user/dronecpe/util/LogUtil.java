@@ -35,11 +35,11 @@ public class LogUtil {
         }
     }
 
-    public static void D(@NonNull String tag, @NonNull String logMessage) {
-        if (BuildConfig.DEBUG) {
-            Log.d(tag, logMessage);
-        }
-    }
+//    public static void D(@NonNull String tag, @NonNull String logMessage) {
+//        if (BuildConfig.DEBUG) {
+//            Log.d(tag, logMessage);
+//        }
+//    }
 
     public static <T> void D(@NonNull String tag, @NonNull List<T> objList) {
         if (BuildConfig.DEBUG) {

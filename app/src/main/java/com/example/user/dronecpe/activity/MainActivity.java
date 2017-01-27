@@ -59,6 +59,7 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -377,7 +378,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -471,6 +471,7 @@ public class MainActivity extends AppCompatActivity implements
         seekBarYaw.setOnSeekBarChangeListener(getOnSeekBarChangeListener());
         joystickRight.setJoyID(JoystickView.JOY_RIGHT);
         btnSetting.setOnClickListener(this);
+        mDroneModel.setModeGimBal(btnCameraControl.isChecked());
     }
 
 //    public void InitView() {
@@ -638,6 +639,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    @OnCheckedChanged(R.id.btnCameraControl)
+    public void setOnChecked(boolean isChecked) {
+        mDroneModel.setModeGimBal(isChecked);
+    }
+
     /******************************************************************************
      * Joy stick left event
      * Throttle high
@@ -733,46 +739,48 @@ public class MainActivity extends AppCompatActivity implements
                         //Pitch forward
                         case JoystickView.FRONT:
                             directionTextViewRight.setText("front");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.FRONT_RIGHT:
                             directionTextViewRight.setText("front_right");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.LEFT_FRONT:
                             directionTextViewRight.setText("left_front");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Pitch backward
                         case JoystickView.RIGHT_BOTTOM:
                             directionTextViewRight.setText("right_bottom");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM:
                             directionTextViewRight.setText("bottom");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
                         case JoystickView.BOTTOM_LEFT:
                             directionTextViewRight.setText("bottom_left");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_PITCH_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_PITCH_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_PITCH, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll right
                         case JoystickView.RIGHT:
                             directionTextViewRight.setText("right");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_ROLL_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_ROLL_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_ROLL, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //Roll left
                         case JoystickView.LEFT:
                             directionTextViewRight.setText("left");
-                            mDroneModel.setJoyDirection("", DroneAPI.DRONE_ROLL_PARAM, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_ROLL_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_ROLL, String.valueOf(power), String.valueOf(angle));
                             break;
 
                         //None Action
                         default:
                             directionTextViewRight.setText("center");
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_ROLL_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_ROLL, String.valueOf(power), String.valueOf(angle));
+                            break;
                     }
                 }
             });
@@ -1012,6 +1020,7 @@ public class MainActivity extends AppCompatActivity implements
 //            }
 //        }
 //    }
+
     /******************************************************************************
      // Sensor Register un use
      //*******************************************************************************/

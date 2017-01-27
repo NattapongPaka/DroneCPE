@@ -37,9 +37,6 @@ public class CommandUtil {
      * DRONE_ROLL	            006	0000 to 0060	S0060030E
      * DRONE_THROTTLE	        007	1100 to 2000	S0071100E
      * DRONE_YAW	            008	0000 to 0180	S0080030E
-     * DRONE_GIMBAL_AXIS_YAW	009	0000 to 0180	S0090090E
-     * DRONE_GIMBAL_AXIS_PITCH	010	0000 to 0180	S0100090E
-     * DRONE_GIMBAL_AXIS_ROLL	011	0000 to 0180	S0110090E
      */
     public String getDirectionProtocol(String param, int value) {
         String cmd = null;
@@ -51,35 +48,71 @@ public class CommandUtil {
             case DroneAPI.DRONE_YAW_PARAM:
                 cmd = DroneAPI.PREFIX + param + String.format(Locale.getDefault(), "%04d", Math.min(DroneAPI.DRONE_YAW_MAX, value)) + DroneAPI.SUFFIX;
                 break;
+        }
+        return cmd;
+    }
 
+    /**
+     * DRONE_GIMBAL_AXIS_YAW	009	0000 to 0180	S0090090E
+     * DRONE_GIMBAL_AXIS_PITCH	010	0000 to 0180	S0100090E
+     * DRONE_GIMBAL_AXIS_ROLL	011	0000 to 0180	S0110090E
+     **/
+    public String getGimbalProtocal(String param, int value, String direction) {
+        String cmd = null;
+        int speed = 0;
+        switch (param) {
             case DroneAPI.DRONE_GIMBAL_AXIS_PITCH:
+                int direcPit = Math.abs(Integer.parseInt(direction));
+                if (direcPit > 0 && direcPit < 90) {            //Forward
+                    speed = map(value, 0, 100, 0, 90);
+                } else if (direcPit > 90 && direcPit < 180) {   //Backward
+                    speed = map(value, 0, 100, 90, 180);
+                }
+                break;
+
             case DroneAPI.DRONE_GIMBAL_AXIS_ROLL:
+                int direcRoll = Integer.parseInt(direction);
+                if (direcRoll < -90) {              //Left
+                    speed = map(value, 0, 100, 0, 90);
+                } else  {                           //Right
+                    speed = map(value, 0, 100, 90, 180);
+                }
+                break;
+
             case DroneAPI.DRONE_GIMBAL_AXIS_YAW:
-                cmd = DroneAPI.PREFIX + param + String.format(Locale.getDefault(), "%04d", Math.min(DroneAPI.DRONE_GIMBAL_3AXIS, value)) + DroneAPI.SUFFIX;
+                speed = map(value, 0, 100, 0, 180);
                 break;
         }
+        cmd = DroneAPI.PREFIX + param + String.format(Locale.getDefault(), "%04d", Math.min(DroneAPI.DRONE_GIMBAL_3AXIS, speed)) + DroneAPI.SUFFIX;
         return cmd;
     }
 
     public String getDirectionProtocol(String param, String value, String direction) {
         String cmd = null;
+        int speed = 0;
         switch (param) {
             case DroneAPI.DRONE_PITCH_PARAM:
-            case DroneAPI.DRONE_ROLL_PARAM:
                 int direc = Math.abs(Integer.parseInt(direction));
-                int speed = 0;
                 if (direc > 0 && direc < 90) {            //Forward
                     speed = map(Integer.parseInt(value), 0, 100, 0, 30);
                 } else if (direc > 90 && direc < 180) {   //Backward
                     speed = map(Integer.parseInt(value), 0, 100, 30, 60);
                 }
-                cmd = DroneAPI.PREFIX + param + String.format(Locale.getDefault(), "%04d", speed) + DroneAPI.SUFFIX;
+                break;
+            case DroneAPI.DRONE_ROLL_PARAM:
+                int direcRoll = Integer.parseInt(direction);
+                if (direcRoll < -90) {                      //Left
+                    speed = map(Integer.parseInt(value), 0, 100, 0, 30);
+                } else  {                                   //Right
+                    speed = map(Integer.parseInt(value), 0, 100, 30, 60);
+                }
                 break;
         }
+        cmd = DroneAPI.PREFIX + param + String.format(Locale.getDefault(), "%04d", speed) + DroneAPI.SUFFIX;
         return cmd;
     }
 
-    public int map(int x, int in_min, int in_max, int out_min, int out_max) {
+    private int map(int x, int in_min, int in_max, int out_min, int out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 }

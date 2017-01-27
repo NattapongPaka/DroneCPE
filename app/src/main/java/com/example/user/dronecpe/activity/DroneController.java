@@ -1,6 +1,7 @@
 package com.example.user.dronecpe.activity;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -9,6 +10,7 @@ import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.util.CommandUtil;
 import com.example.user.dronecpe.util.LogUtil;
+import com.google.android.gms.location.LocationRequest;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,6 +18,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 
 /**
  * Created by USER on 7/5/2559.
@@ -25,8 +34,7 @@ public class DroneController implements
         DroneModel.OnTakeOffListener,
         DroneModel.OnResetListener,
         DroneModel.OnSeekBarThrottleListener,
-        DroneModel.OnSeekBarYawListener
-{
+        DroneModel.OnSeekBarYawListener {
 
     private Context context;
     private String TAG = DroneController.class.getSimpleName();
@@ -98,13 +106,30 @@ public class DroneController implements
             String droneSpeed = droneModel.getDroneControlSpeed();
             String droneAngle = droneModel.getDroneControlAngle();
             //String cmd = appendCommand(droneRequest,droneMode,droneSpeed,droneAngle);
-            String cmd = CommandUtil.getInstance().getDirectionProtocol(droneMode, droneSpeed, droneAngle);
-            if (droneSpeed.equals(lastSpeed)) {
-                LogUtil.E("Not send request : lastSpeed : %s ", cmd);
-            } else {
-                SendData(cmd);
+            //LogUtil.D("isModeGimBal %s",droneModel.isModeGimBal());
+            if (droneModel.isModeGimBal()) {
+                String cmd = CommandUtil.getInstance().getGimbalProtocal(droneMode, Integer.parseInt(droneSpeed), droneAngle);
+                if (lastSpeed != null && !lastSpeed.isEmpty() && !droneSpeed.equals(lastSpeed)) {
+                    SendData(cmd);
+                    LogUtil.D("Send mode gimbal %s", cmd);
+                }
                 lastSpeed = droneSpeed;
-                LogUtil.D(cmd);
+
+            } else {
+                String cmd = CommandUtil.getInstance().getDirectionProtocol(droneMode, droneSpeed, droneAngle);
+                if (lastSpeed != null && !lastSpeed.isEmpty() && !droneSpeed.equals(lastSpeed)) {
+                    SendData(cmd);
+                    LogUtil.D("Send direction %s", cmd);
+                }
+                lastSpeed = droneSpeed;
+
+//                if (lastSpeed != null && !lastSpeed.isEmpty() && droneSpeed.equals(lastSpeed)) {
+//                    LogUtil.E("Not send request : lastSpeed : %s ", cmd);
+//                } else {
+//                    SendData(cmd);
+//                    lastSpeed = droneSpeed;
+//                    LogUtil.D("Send direction %s",cmd);
+//                }
             }
             //SendData(droneModel.getJoyDirection());
             //LogUtil.D(droneModel.getJoyDirection());
@@ -112,7 +137,6 @@ public class DroneController implements
             ex.printStackTrace();
         }
     }
-
 
 
     @Override
@@ -142,10 +166,12 @@ public class DroneController implements
     @Override
     public void onThrottleChange(DroneModel droneModel) {
         try {
-            String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_THROTTLE_PARAM, droneModel.getThottle());
-            LogUtil.D(cmd);
-            SendData(cmd);
-        }catch (Exception ex){
+            if (!droneModel.isModeGimBal()) {
+                String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_THROTTLE_PARAM, droneModel.getThottle());
+                LogUtil.D(cmd);
+                SendData(cmd);
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -153,10 +179,16 @@ public class DroneController implements
     @Override
     public void onYawChange(DroneModel droneModel) {
         try {
-            String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_YAW_PARAM, droneModel.getYaw());
-            LogUtil.D(cmd);
-            SendData(cmd);
-        }catch (Exception ex){
+            if (droneModel.isModeGimBal()) {
+                String cmd = CommandUtil.getInstance().getGimbalProtocal(DroneAPI.DRONE_GIMBAL_AXIS_YAW, droneModel.getYaw(), "");
+                LogUtil.D(cmd);
+                SendData(cmd);
+            } else {
+                String cmd = CommandUtil.getInstance().getDirectionProtocol(DroneAPI.DRONE_YAW_PARAM, droneModel.getYaw());
+                LogUtil.D(cmd);
+                SendData(cmd);
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -195,7 +227,7 @@ public class DroneController implements
                 if (dataInputStream.available() > 0) {
                     while ((msgResponse = dataInputStream.readLine()) != null) {
                         //LogUtil.D("Data response %s",msgResponse);
-                        //ParseCommand(msgResponse);
+                        ParseCommand(msgResponse);
                     }
                 }
 
@@ -276,7 +308,7 @@ public class DroneController implements
                     dataInputStream = new DataInputStream(socket.getInputStream());
                     String msgResponse = null;
                     while ((msgResponse = dataInputStream.readLine()) != null) {
-                        //ParseCommand(msgResponse);
+                        ParseCommand(msgResponse);
                     }
                     Log.i("msg_form_server", String.valueOf(msgResponse));
                 }
@@ -317,33 +349,34 @@ public class DroneController implements
 
     /**
      * Parse command before broadcast
+     *
      * @param msgIn
      */
-//    private void ParseCommand(String msgIn) {
+    private void ParseCommand(String msgIn) {
 //        String[] msg1 = msgIn.split(":");
-//        Log.i("msg_form_server", msgIn);
+        LogUtil.D("msg_form_server %s", msgIn);
 //        for (String m : msg1) {
 //            String[] msg2 = m.split(",");
 //            String KEY = msg2[0].trim();
 //            String VALUE = msg2[1].trim();
 //
-//            if (KEY.equals(DroneAPI.DRONE_READY)) {
-//                Log.i("DRONE_READY", VALUE);
+//            if (KEY.equals(DroneAPI.DRONE_READY_PARAM)) {
+//                LogUtil.D("DRONE_READY %s", VALUE);
 //                mDroneModel.setReady(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_BATTERY)) {
-//                Log.i("DRONE_BATTERY", VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_BATTERY_PARAM)) {
+//                LogUtil.D("DRONE_BATTERY %s", VALUE);
 //                mDroneModel.setBattery(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI)) {
-//                Log.i("DRONE_SIGNAL_WIFI", VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI_PARAM)) {
+//                LogUtil.D("DRONE_SIGNAL_WIFI %s", VALUE);
 //                mDroneModel.setSignalWifi(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_GPS)) {
-//                Log.i("DRONE_GPS", VALUE);
+//            } else if (KEY.equals(DroneAPI.DRONE_GPS_PARAM)) {
+//                LogUtil.D("DRONE_GPS %s", VALUE);
 //                mDroneModel.setGps(VALUE);
 //            }
 //            //TODO parse gyro
-//            Log.i("loop_msg_form_server", KEY + "->" + VALUE);
+//            LogUtil.D("loop_msg_form_server %s %s", KEY, VALUE);
 //        }
-//    }
+    }
 
     /**
      * Get location
@@ -382,7 +415,7 @@ public class DroneController implements
 //                if(location != null){
 //                    double lat = location.getLatitude();
 //                    double lng = location.getLongitude();
-//                    Log.d(TAG,String.valueOf(lat)+":"+String.valueOf(lng));
+//                    LogUtil.D("Update location %.4f %.4f",lat,lng);
 //                }
 //            }
 //        });

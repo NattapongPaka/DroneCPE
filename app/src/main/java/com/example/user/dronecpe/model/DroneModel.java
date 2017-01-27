@@ -26,6 +26,7 @@ public class DroneModel {
 	private int thottle;
 	private int yaw;
 
+	private boolean modeGimBal;
 	/*******************************************************************
 	 * 
 	 * 1.Method Interface Listener
@@ -121,15 +122,12 @@ public class DroneModel {
 	public void setOnTakeOffListener(OnTakeOffListener onTakeOffListener){
 		this.onTakeOffListener = onTakeOffListener;
 	}
-
 	public void setOnGPSPlayerListener(OnGPSPlayerListener onGPSPlayerListener){
 		this.onGPSPlayerListener = onGPSPlayerListener;
 	}
-
 	public void setOnSeekBarThrottleListener(OnSeekBarThrottleListener onSeekBarThrottleListener){
 		this.onSeekBarThrottleListener = onSeekBarThrottleListener;
 	}
-
 	public void setOnSeekBarYawListener(OnSeekBarYawListener onSeekBarYawListener){
 		this.onSeekBarYawListener = onSeekBarYawListener;
 	}
@@ -232,6 +230,10 @@ public class DroneModel {
 		}
 	}
 
+	public void setModeGimBal(boolean isGimBal){
+		this.modeGimBal = isGimBal;
+	}
+
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
@@ -311,5 +313,9 @@ public class DroneModel {
 
 	public int getYaw() {
 		return yaw;
+	}
+
+	public boolean isModeGimBal() {
+		return modeGimBal;
 	}
 }

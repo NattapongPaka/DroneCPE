@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements
         OnClickListener,
         DroneModel.OnGPSPlayerListener {
 
-    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
     @BindView(R.id.imgGPS)
     ImageView imgGPS;
@@ -105,8 +104,6 @@ public class MainActivity extends AppCompatActivity implements
     MjpegSurfaceView mjpegView;
     @BindView(R.id.txtLatLng)
     TextView txtLatLng;
-    //    @BindView(R.id.joystickView1)
-//    JoystickView joystickLeft;
     @BindView(R.id.joystickView2)
     JoystickView joystickRight;
     @BindView(R.id.gyroSensorView)
@@ -150,10 +147,11 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.bottomPanel)
     RelativeLayout bottomPanel;
 
-
+//    @BindView(R.id.joystickView1)
+//    JoystickView joystickLeft;
 //    @BindView(R.id.gyroSensorView)
 //    AccelerometerView mAccelerometer;
-
+//
 //    private ImageView arrow_up3;
 //    private ImageView arrow_up4;
 //
@@ -177,8 +175,17 @@ public class MainActivity extends AppCompatActivity implements
 //    private JoystickView joystickLeft;
 //    private JoystickView joystickRight;
 //    private ImageButton btnSetting;
+//    private AccelerometerView mAccelerometer;
+//    private int count = 0;
+//    private Socket mSocket;
+//    private OutputStreamWriter mOutputStreamWriter;
+//    private BufferedWriter mBufferedWriter;
+//    private PrintWriter mPrintWriter;
+//    private static final int SERVERPORT = 8888;
+//    private static final String SERVER_IP = "192.168.43.195";
 
-    //    private AccelerometerView mAccelerometer;
+//    private MjpegView mjpegView;
+
     private SensorManager mSensorManager;
 
     private float[] acceleration = new float[3];
@@ -193,23 +200,13 @@ public class MainActivity extends AppCompatActivity implements
     private static final int ID_CAMERA = 5;
     private static final int ID_SETTING = 6;
 
-//    private int count = 0;
-//    private Socket mSocket;
-//    private OutputStreamWriter mOutputStreamWriter;
-//    private BufferedWriter mBufferedWriter;
-//    private PrintWriter mPrintWriter;
-//    private static final int SERVERPORT = 8888;
-//    private static final String SERVER_IP = "192.168.43.195";
-
     private WifiApManager wifiApManager;
-//    private MjpegView mjpegView;
-
     private DroneController mDroneController;
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
     private LocalBinder myService;
     private boolean isBound = false;
-
-    private static final int TIME_INTERVAL = 2000; // # milliseconds, desired time passed between two back presses.
+    private final int TIME_INTERVAL = 2000; // # milliseconds, desired time passed between two back presses.
+    private final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
     private long mBackPressed;
 
     /**
@@ -279,8 +276,8 @@ public class MainActivity extends AppCompatActivity implements
      * Check permission for api >= 23
      */
     private void requestPermissionLocation() {
-        List<String> permissionsNeeded = new ArrayList<String>();
-        List<String> permissionsList = new ArrayList<String>();
+        List<String> permissionsNeeded = new ArrayList<>();
+        List<String> permissionsList = new ArrayList<>();
 
         if (!addPermission(permissionsList, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             permissionsNeeded.add("GPS");
@@ -317,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Check permission never ask again
-     *
      * @param permissionsList
      * @param permission
      * @return
@@ -431,7 +427,6 @@ public class MainActivity extends AppCompatActivity implements
                             Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
                             Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
                         });
-
     }
 
     /**
@@ -508,7 +503,6 @@ public class MainActivity extends AppCompatActivity implements
 //        webView.getSettings().setJavaScriptEnabled(true);
 //    }
 
-
     public void InitEvent() {
         // Register Model Listener
         mDroneModel.setOnGyroSensorListener(this);
@@ -573,17 +567,14 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * All button event
-     *
      * @param v
      */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnSetting:
-                //mQuickAction.show(v);
-                //mQuickAction.setAnimStyle(QuickAction.ANIM_GROW_FROM_LEFT);
                 DialogSetting mDialogSetting = DialogSetting.newInstance();
-                mDialogSetting.show(getSupportFragmentManager(), "TAG");
+                mDialogSetting.show(getSupportFragmentManager(), DialogSetting.TAG);
                 mDialogSetting.setOnDialogSettingClickListener(new DialogSetting.IDialogSetting() {
                     @Override
                     public void onSettingSuccess() {
@@ -594,16 +585,6 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 });
                 break;
-
-//            case R.id.btnCameraMenu:
-//                // custom dialog
-//                final Dialog dialog = new Dialog(this);
-//                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-//                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//                //dialog.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//                dialog.setContentView(R.layout.layout_dialog);
-//                dialog.show();
-//                break;
 
             case R.id.btnInfo:
                 break;
@@ -789,7 +770,6 @@ public class MainActivity extends AppCompatActivity implements
 
 //    /**
 //     * Quick action event
-//     *
 //     * @param quickAction
 //     * @param pos
 //     * @param actionId

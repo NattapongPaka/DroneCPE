@@ -2,7 +2,6 @@ package com.example.user.dronecpe.util;
 
 import com.example.user.dronecpe.activity.DroneAPI;
 
-import java.util.Comparator;
 import java.util.Locale;
 
 /**
@@ -72,9 +71,9 @@ public class CommandUtil {
 
             case DroneAPI.DRONE_GIMBAL_AXIS_ROLL:
                 int direcRoll = Integer.parseInt(direction);
-                if (direcRoll < -90) {              //Left
+                if (direcRoll < -90) {                          //Left
                     speed = map(value, 0, 100, 0, 90);
-                } else  {                           //Right
+                } else  {                                       //Right
                     speed = map(value, 0, 100, 90, 180);
                 }
                 break;
@@ -93,17 +92,17 @@ public class CommandUtil {
         switch (param) {
             case DroneAPI.DRONE_PITCH_PARAM:
                 int direc = Math.abs(Integer.parseInt(direction));
-                if (direc > 0 && direc < 90) {            //Forward
+                if (direc > 0 && direc < 90) {                  //Forward
                     speed = map(Integer.parseInt(value), 0, 100, 0, 30);
-                } else if (direc > 90 && direc < 180) {   //Backward
+                } else if (direc > 90 && direc < 180) {         //Backward
                     speed = map(Integer.parseInt(value), 0, 100, 30, 60);
                 }
                 break;
             case DroneAPI.DRONE_ROLL_PARAM:
                 int direcRoll = Integer.parseInt(direction);
-                if (direcRoll < -90) {                      //Left
+                if (direcRoll < -90) {                          //Left
                     speed = map(Integer.parseInt(value), 0, 100, 0, 30);
-                } else  {                                   //Right
+                } else  {                                       //Right
                     speed = map(Integer.parseInt(value), 0, 100, 30, 60);
                 }
                 break;

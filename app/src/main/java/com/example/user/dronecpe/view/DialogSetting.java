@@ -30,7 +30,7 @@ public class DialogSetting extends AppCompatDialogFragment {
     private RecyclerView mRecyclerView;
     private DialogSettingAdapter mDialogSettingAdapter;
     private Button btnOK;
-    private String TAG = DialogSetting.class.getSimpleName();
+    public static final String TAG = DialogSetting.class.getSimpleName();
 
     public static final String HOST_IP_ID = "0";
     public static final String HOST_PORT_ID = "1";

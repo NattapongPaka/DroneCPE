@@ -434,28 +434,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * Ref http://github.com/lorensiuswlt/NewQuickAction
-     * Setting
-     */
-//    public void Setting() {
-//        //ActionItem Open = new ActionItem(ID_OPEN, "Connect", ActivityCompat.getDrawable(this, R.drawable.ic_wifi_tethering_grey_600_48dp));
-//        //ActionItem Close = new ActionItem(ID_CLOSE, "Close", ActivityCompat.getDrawable(this, R.drawable.ic_portable_wifi_off_grey_600_48dp));
-//        //ActionItem Connect = new ActionItem(ID_CONNECT, "Connect", getResources().getDrawable(R.drawable.ic_wifi_icon));
-//        //ActionItem Rec = new ActionItem(ID_VDO, "Rec", getResources().getDrawable(R.drawable.ic_wifi_icon));
-//        //ActionItem Camera = new ActionItem(ID_CAMERA, "Camera", ActivityCompat.getDrawable(this, R.drawable.ic_linked_camera_grey_600_48dp));
-//        //ActionItem Setting = new ActionItem(ID_SETTING, "Setting", ActivityCompat.getDrawable(this, R.drawable.ic_edit_grey_600_48dp));
-//
-//        mQuickAction = new QuickAction(this);
-////        mQuickAction.addActionItem(Open);
-////        mQuickAction.addActionItem(Close);
-////        mQuickAction.addActionItem(Connect);
-////        mQuickAction.addActionItem(Rec);
-////        mQuickAction.addActionItem(Camera);
-////        mQuickAction.addActionItem(Setting);
-//        mQuickAction.setOnActionItemClickListener(this);
-//    }
-
-    /**
      * All Initializing
      */
     public void InitLayout() {
@@ -472,40 +450,6 @@ public class MainActivity extends AppCompatActivity implements
         btnSetting.setOnClickListener(this);
         mDroneModel.setModeGimBal(btnCameraControl.isChecked());
     }
-
-//    public void InitView() {
-//        seekBar = (VerticalSeekBar_Reverse) findViewById(R.id.seekbar_reverse);
-//        arrow_up3 = (ImageView) findViewById(R.id.arrow_up3);
-//        arrow_up4 = (ImageView) findViewById(R.id.arrow_up4);
-//        txtGPS = (TextView) findViewById(R.id.txtGPS);
-//        txtLatLng = (TextView) findViewById(R.id.txtLatLng);
-//        imgGPS = (ImageView) findViewById(R.id.imgGPS);
-//        mAccelerometer = (AccelerometerView) findViewById(R.id.gyroSensorView);
-//        mSensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-//        mSensorManager.registerListener(mySensorEventListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-//        angleTextViewLeft = (TextView) findViewById(R.id.txt1);
-//        powerTextViewLeft = (TextView) findViewById(R.id.txt2);
-//        directionTextViewLeft = (TextView) findViewById(R.id.txt3);
-//        angleTextViewRight = (TextView) findViewById(R.id.txt4);
-//        powerTextViewRight = (TextView) findViewById(R.id.txt5);
-//        directionTextViewRight = (TextView) findViewById(R.id.txt6);
-//        txtStatus = (TextView) findViewById(R.id.txtStatus);
-//        btnSetting = (ImageButton) findViewById(R.id.btnSetting);
-//        joystickLeft = (JoystickView) findViewById(R.id.joystickView1);
-//        joystickLeft.setJoyID(JoystickView.JOY_LEFT);
-//        joystickRight = (JoystickView) findViewById(R.id.joystickView2);
-//        joystickRight.destroyDrawingCache();
-//        joystickRight.setJoyID(JoystickView.JOY_RIGHT);
-//        txtWifiSignal = (TextView) findViewById(R.id.txtWifiSignal);
-//        txtBettery = (TextView) findViewById(R.id.txtBettery);
-//        mjpegView = (MjpegView) findViewById(R.id.mjpegViewDefault);
-//        btnSetting.setOnClickListener(this);
-//        Setting();
-//        webView = (WebView) findViewById(R.id.webView);
-//        webView.setWebChromeClient(new WebChromeClient());
-//        webView.getSettings().setPluginState(WebSettings.PluginState.ON_DEMAND);
-//        webView.getSettings().setJavaScriptEnabled(true);
-//    }
 
     public void InitEvent() {
         // Register Model Listener

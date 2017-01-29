@@ -34,7 +34,9 @@ public class DroneController implements
         DroneModel.OnTakeOffListener,
         DroneModel.OnResetListener,
         DroneModel.OnSeekBarThrottleListener,
-        DroneModel.OnSeekBarYawListener {
+        DroneModel.OnSeekBarYawListener
+
+{
 
     private Context context;
     private String TAG = DroneController.class.getSimpleName();

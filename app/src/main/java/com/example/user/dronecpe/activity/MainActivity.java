@@ -13,6 +13,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -22,6 +23,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,6 +46,7 @@ import com.example.user.dronecpe.model.GPSTracker.LocalBinder;
 import com.example.user.dronecpe.preference.UtilPreference;
 import com.example.user.dronecpe.qaction.QuickAction;
 import com.example.user.dronecpe.util.LogUtil;
+import com.example.user.dronecpe.util.NetworkUtil;
 import com.example.user.dronecpe.view.AccelerometerView;
 import com.example.user.dronecpe.view.DialogSetting;
 import com.example.user.dronecpe.view.JoystickView;
@@ -69,7 +72,8 @@ public class MainActivity extends AppCompatActivity implements
         DroneModel.OnSignalWifiListener,
         DroneModel.OnGPSListener,
         OnClickListener,
-        DroneModel.OnGPSPlayerListener {
+        DroneModel.OnGPSPlayerListener,
+        DroneModel.OnIPListener {
 
 
     @BindView(R.id.imgGPS)
@@ -98,8 +102,6 @@ public class MainActivity extends AppCompatActivity implements
     TextView txtBettery;
     @BindView(R.id.lyBattery)
     LinearLayout lyBattery;
-    @BindView(R.id.txtStatus)
-    TextView txtStatus;
     @BindView(R.id.mjpegViewDefault)
     MjpegSurfaceView mjpegView;
     @BindView(R.id.txtLatLng)
@@ -136,16 +138,20 @@ public class MainActivity extends AppCompatActivity implements
     TextView directionTextViewRight;
     @BindView(R.id.imgMyIPStatus)
     ImageView imgMyIPStatus;
+    @BindView(R.id.txtDroneIP)
+    TextView txtDroneIP;
     @BindView(R.id.imgDroneIPStatus)
     ImageView imgDroneIPStatus;
-    @BindView(R.id.txtStatusDrone)
-    TextView txtStatusDrone;
+    @BindView(R.id.txtPlayerIP)
+    TextView txtPlayerIP;
     @BindView(R.id.topPanel)
     RelativeLayout topPanel;
     @BindView(R.id.btnCameraControl)
     ToggleButton btnCameraControl;
     @BindView(R.id.bottomPanel)
     RelativeLayout bottomPanel;
+
+
 
 //    @BindView(R.id.joystickView1)
 //    JoystickView joystickLeft;
@@ -314,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Check permission never ask again
+     *
      * @param permissionsList
      * @param permission
      * @return
@@ -377,7 +384,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Initializing
         InitLayout();
         InitView();
         InitEvent();
@@ -402,8 +408,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private DisplayMode calculateDisplayMode() {
         int orientation = getResources().getConfiguration().orientation;
-        return orientation == Configuration.ORIENTATION_LANDSCAPE ?
-                DisplayMode.FULLSCREEN : DisplayMode.BEST_FIT;
+        return orientation == Configuration.ORIENTATION_LANDSCAPE ? DisplayMode.FULLSCREEN : DisplayMode.BEST_FIT;
     }
 
     private void loadIpCam() {
@@ -511,6 +516,7 @@ public class MainActivity extends AppCompatActivity implements
         mDroneModel.setOnSignalWifiListener(this);
         mDroneModel.setOnGPSListener(this);
         mDroneModel.setOnGPSPlayerListener(this);
+        mDroneModel.setOnIPListener(this);
         // Register Joy Listener
         //joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
         joystickRight.setOnJoystickMoveListener(onJoystickMoveListenerRight, JoystickView.DEFAULT_LOOP_INTERVAL);
@@ -567,6 +573,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * All button event
+     *
      * @param v
      */
     @Override
@@ -581,7 +588,9 @@ public class MainActivity extends AppCompatActivity implements
                         String droneIP = UtilPreference.getInstance().getIP(DialogSetting.HOST_IP_ID);
                         int dronePort = UtilPreference.getInstance().getPort(DialogSetting.HOST_PORT_ID);
                         mDroneController = new DroneController(MainActivity.this, droneIP, dronePort);
-                        Toast.makeText(MainActivity.this, "Connecting!!!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Start Connect drone", Toast.LENGTH_SHORT).show();
+                        mDroneModel.setDroneIP(droneIP);
+                        mDroneModel.setPlayerIP(NetworkUtil.getInstance().getIPAddressIP4());
                     }
                 });
                 break;
@@ -843,7 +852,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onSignalWifiListener(DroneModel droneModel) {
-        Log.i("onSignalWifiListenerUI", droneModel.getSignalWifi());
+        LogUtil.D("onSignalWifiListenerUI %s", droneModel.getSignalWifi());
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -857,7 +866,6 @@ public class MainActivity extends AppCompatActivity implements
      * Player GPS
      */
     private ServiceConnection myConnection = new ServiceConnection() {
-
         public void onServiceConnected(ComponentName className, IBinder service) {
             LocalBinder binder = (LocalBinder) service;
             myService = binder.getService();
@@ -902,6 +910,17 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         }, 10);
+    }
+
+    @Override
+    public void onIPChangerListener(DroneModel droneModel) {
+        if (droneModel.getPlayerIP() != null && !droneModel.getPlayerIP().isEmpty()) {
+            imgMyIPStatus.setImageDrawable(ContextCompat.getDrawable(this,R.drawable.ic_connect));
+            txtPlayerIP.setText(droneModel.getPlayerIP());
+        } else if (droneModel.getDroneIP() != null && !droneModel.getDroneIP().isEmpty()) {
+            imgDroneIPStatus.setImageDrawable(ContextCompat.getDrawable(this,R.drawable.ic_connect));
+            txtDroneIP.setText(droneModel.getDroneIP());
+        }
     }
 
     /**

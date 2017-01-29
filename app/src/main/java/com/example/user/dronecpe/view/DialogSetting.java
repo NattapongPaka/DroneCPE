@@ -15,6 +15,7 @@ import android.widget.Button;
 import com.example.user.dronecpe.R;
 import com.example.user.dronecpe.model.SettingModel;
 import com.example.user.dronecpe.preference.UtilPreference;
+import com.example.user.dronecpe.util.LogUtil;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -57,14 +58,14 @@ public class DialogSetting extends AppCompatDialogFragment {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.my_recycler_view);
         btnOK = (Button) v.findViewById(R.id.btnOKSetting);
         btnOK.setOnClickListener(onClickListener);
-        Log.d(TAG, "onCreateView: ");
+        LogUtil.D(TAG, "onCreateView: ");
         return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "onActivityCreated: ");
+        LogUtil.D(TAG, "onActivityCreated: ");
         List<SettingModel> settingModels = new ArrayList<>();
         Map<String, ?> mapSettingModel = UtilPreference.getInstance().getAllSharedPreference();
         if (mapSettingModel != null && !mapSettingModel.isEmpty()) {
@@ -98,7 +99,7 @@ public class DialogSetting extends AppCompatDialogFragment {
                     SettingModel settingModel = (SettingModel) mDialogSettingAdapter.getItemObject(i);
                     String settingObject = new Gson().toJson(settingModel);
                     UtilPreference.getInstance().setSharedPreference(settingModel.getId(), settingObject);
-                    Log.d(TAG, "onClick : " + settingObject);
+                    LogUtil.D(TAG, "onClick : " + settingObject);
                 }
             }
             if(iDialogSetting != null){

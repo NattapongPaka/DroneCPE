@@ -166,7 +166,7 @@
             android:background="@drawable/ic_disconnect" />
 
         <TextView
-            android:id="@+id/txtStatus"
+            android:id="@+id/txtPlayerIP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -179,16 +179,16 @@
             android:id="@+id/imgDroneIPStatus"
             android:layout_width="8dp"
             android:layout_height="8dp"
-            android:layout_below="@+id/txtStatus"
+            android:layout_below="@+id/txtPlayerIP"
             android:layout_marginTop="8dp"
             android:layout_toRightOf="@+id/btnSetting"
             android:background="@drawable/ic_disconnect" />
 
         <TextView
-            android:id="@+id/txtStatusDrone"
+            android:id="@+id/txtDroneIP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/txtStatus"
+            android:layout_below="@+id/txtPlayerIP"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="4dp"
             android:layout_toRightOf="@+id/imgDroneIPStatus"

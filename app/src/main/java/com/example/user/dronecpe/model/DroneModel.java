@@ -9,6 +9,8 @@ public class DroneModel {
 	private int power;
 	private int direction;
 
+	private String playerIP;
+	private String droneIP;
 	private String battery;
 	private String signalWifi;
 	private String gps;
@@ -77,6 +79,10 @@ public class DroneModel {
 		void onYawChange(DroneModel droneModel);
 	}
 
+	public interface OnIPListener{
+		void onIPChangerListener(DroneModel droneModel);
+	}
+
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -93,6 +99,7 @@ public class DroneModel {
 	private OnGPSPlayerListener onGPSPlayerListener;
 	private OnSeekBarThrottleListener onSeekBarThrottleListener;
 	private OnSeekBarYawListener onSeekBarYawListener;
+	private OnIPListener onIPListener;
 	/*******************************************************************
 	 * 
 	 * 3.Method Listener
@@ -130,6 +137,10 @@ public class DroneModel {
 	}
 	public void setOnSeekBarYawListener(OnSeekBarYawListener onSeekBarYawListener){
 		this.onSeekBarYawListener = onSeekBarYawListener;
+	}
+
+	public void setOnIPListener(OnIPListener onIPListener){
+		this.onIPListener = onIPListener;
 	}
 	/*******************************************************************
 	 * 
@@ -234,6 +245,20 @@ public class DroneModel {
 		this.modeGimBal = isGimBal;
 	}
 
+	public void setPlayerIP(String playerIP){
+		this.playerIP = playerIP;
+		if(onIPListener != null){
+			this.onIPListener.onIPChangerListener(this);
+		}
+	}
+
+	public void setDroneIP(String droneIP){
+		this.droneIP = droneIP;
+		if(onIPListener != null){
+			this.onIPListener.onIPChangerListener(this);
+		}
+	}
+
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
@@ -317,5 +342,13 @@ public class DroneModel {
 
 	public boolean isModeGimBal() {
 		return modeGimBal;
+	}
+
+	public String getPlayerIP() {
+		return playerIP;
+	}
+
+	public String getDroneIP() {
+		return droneIP;
 	}
 }

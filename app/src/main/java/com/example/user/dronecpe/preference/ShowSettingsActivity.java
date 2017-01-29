@@ -27,7 +27,6 @@ public class ShowSettingsActivity extends Activity {
 
 		TextView settingsTextView = (TextView) findViewById(R.id.settings_text_view);
 		settingsTextView.setText(builder.toString());
-
 	}
 
 }

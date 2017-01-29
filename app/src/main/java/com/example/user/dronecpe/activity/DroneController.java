@@ -1,16 +1,15 @@
 package com.example.user.dronecpe.activity;
 
 import android.content.Context;
-import android.location.Location;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.user.dronecpe.BuildConfig;
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
 import com.example.user.dronecpe.util.CommandUtil;
 import com.example.user.dronecpe.util.LogUtil;
-import com.google.android.gms.location.LocationRequest;
+import com.example.user.dronecpe.util.NetworkUtil;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -20,11 +19,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
-import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by USER on 7/5/2559.
@@ -34,9 +32,7 @@ public class DroneController implements
         DroneModel.OnTakeOffListener,
         DroneModel.OnResetListener,
         DroneModel.OnSeekBarThrottleListener,
-        DroneModel.OnSeekBarYawListener
-
-{
+        DroneModel.OnSeekBarYawListener {
 
     private Context context;
     private String TAG = DroneController.class.getSimpleName();
@@ -48,14 +44,13 @@ public class DroneController implements
 
     public int PORT_IN = 6000;
 
-    private LocalBroadcastManager mBroadcastManager;
     private ServerSocket serverSocket;
-
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
     private GPSTracker mGpsTracker;
-    private long LOCATION_UPDATE_INTERVAL = 100;
-    private long LOCATION_TIMEOUT_IN_SECONDS = 10;
-    private float SUFFICIENT_ACCURACY = 100.0f;
+
+    private long  LOCATION_UPDATE_INTERVAL      = 100;
+    private long  LOCATION_TIMEOUT_IN_SECONDS   = 10;
+    private float SUFFICIENT_ACCURACY           = 100.0f;
 
     private String lastSpeed;
 
@@ -65,14 +60,30 @@ public class DroneController implements
         this.dstAddress = dstAddress;
         this.dstPort = dstPort;
         registerModelListener();
-        mBroadcastManager = LocalBroadcastManager.getInstance(c);
         try {
-            //mThread = new Thread(new SocketIncomeThread());
-            mThread = new SocketIncomeThread();
-            mThread.start();
+            if (BuildConfig.FakeResponse) {
+                fakeResponseFromRPI();
+            } else {
+                //mThread = new Thread(new SocketIncomeThread());
+                mThread = new SocketIncomeThread();
+                mThread.start();
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void fakeResponseFromRPI() {
+        Observable.interval(1000, TimeUnit.MILLISECONDS, Schedulers.newThread())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        String cmd = NetworkUtil.getInstance().generateFakeResponseFromRPI();
+                        ParseCommand(cmd);
+                    }
+                });
     }
 
     private void registerModelListener() {
@@ -355,34 +366,33 @@ public class DroneController implements
      * @param msgIn
      */
     private void ParseCommand(String msgIn) {
-//        String[] msg1 = msgIn.split(":");
         LogUtil.D("msg_form_server %s", msgIn);
-//        for (String m : msg1) {
-//            String[] msg2 = m.split(",");
-//            String KEY = msg2[0].trim();
-//            String VALUE = msg2[1].trim();
-//
-//            if (KEY.equals(DroneAPI.DRONE_READY_PARAM)) {
-//                LogUtil.D("DRONE_READY %s", VALUE);
-//                mDroneModel.setReady(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_BATTERY_PARAM)) {
-//                LogUtil.D("DRONE_BATTERY %s", VALUE);
-//                mDroneModel.setBattery(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI_PARAM)) {
-//                LogUtil.D("DRONE_SIGNAL_WIFI %s", VALUE);
-//                mDroneModel.setSignalWifi(VALUE);
-//            } else if (KEY.equals(DroneAPI.DRONE_GPS_PARAM)) {
-//                LogUtil.D("DRONE_GPS %s", VALUE);
-//                mDroneModel.setGps(VALUE);
-//            }
-//            //TODO parse gyro
-//            LogUtil.D("loop_msg_form_server %s %s", KEY, VALUE);
-//        }
+        if (msgIn.startsWith("S") && msgIn.endsWith("E")) {
+            String[] cmdIn = msgIn.split(",");
+            String KEY = cmdIn != null && !cmdIn[1].isEmpty() && cmdIn[1].length() == 3 ? cmdIn[1] : "";
+            String VALUE = cmdIn != null && !cmdIn[1].isEmpty() && cmdIn[2].length() == 4 ? cmdIn[2] : "";
+            VALUE = VALUE.trim();
+            int val = Integer.parseInt(VALUE);
+            if (KEY.equals(DroneAPI.DRONE_READY_PARAM)) {
+                LogUtil.D("DRONE_READY %s", val);
+                mDroneModel.setReady(String.valueOf(val));
+            } else if (KEY.equals(DroneAPI.DRONE_BATTERY_PARAM)) {
+                LogUtil.D("DRONE_BATTERY %s", val);
+                mDroneModel.setBattery(String.valueOf(val));
+            } else if (KEY.equals(DroneAPI.DRONE_SIGNAL_WIFI_PARAM)) {
+                LogUtil.D("DRONE_SIGNAL_WIFI %s", val);
+                mDroneModel.setSignalWifi(String.valueOf(val));
+            } else if (KEY.equals(DroneAPI.DRONE_GPS_PARAM)) {
+                LogUtil.D("DRONE_GPS %s", val);
+                mDroneModel.setGps(String.valueOf(val));
+            }
+        }
     }
 
-    /**
-     * Get location
-     */
+
+/**
+ * Get location
+ */
 //    public void getLocation(){
 //        LocationRequest req = LocationRequest.create()
 //                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)

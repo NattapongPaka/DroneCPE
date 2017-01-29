@@ -152,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements
     RelativeLayout bottomPanel;
 
 
-
 //    @BindView(R.id.joystickView1)
 //    JoystickView joystickLeft;
 //    @BindView(R.id.gyroSensorView)
@@ -830,12 +829,23 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onSignalWifiListener(DroneModel droneModel) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                String msg = droneModel.getSignalWifi();
+                txtWifiSignal.setText(msg + "%");
+            }
+        });
+    }
+
+    @Override
     public void onBatteryListener(DroneModel droneModel) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 String msg = droneModel.getBattery();
-                txtBettery.setText(msg);
+                txtBettery.setText(msg + "%");
             }
         });
     }
@@ -850,17 +860,6 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    public void onSignalWifiListener(DroneModel droneModel) {
-        LogUtil.D("onSignalWifiListenerUI %s", droneModel.getSignalWifi());
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                String msg = droneModel.getSignalWifi();
-                txtWifiSignal.setText(msg);
-            }
-        });
-    }
 
     /**
      * Player GPS
@@ -915,10 +914,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onIPChangerListener(DroneModel droneModel) {
         if (droneModel.getPlayerIP() != null && !droneModel.getPlayerIP().isEmpty()) {
-            imgMyIPStatus.setImageDrawable(ContextCompat.getDrawable(this,R.drawable.ic_connect));
+            imgMyIPStatus.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_connect));
             txtPlayerIP.setText(droneModel.getPlayerIP());
         } else if (droneModel.getDroneIP() != null && !droneModel.getDroneIP().isEmpty()) {
-            imgDroneIPStatus.setImageDrawable(ContextCompat.getDrawable(this,R.drawable.ic_connect));
+            imgDroneIPStatus.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_connect));
             txtDroneIP.setText(droneModel.getDroneIP());
         }
     }

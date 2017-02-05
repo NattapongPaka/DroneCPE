@@ -712,7 +712,7 @@ public class MainActivity extends AppCompatActivity implements
                         //None Action
                         default:
                             directionTextViewRight.setText("center");
-                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_ROLL_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_ROLL, String.valueOf(power), String.valueOf(angle));
+                            mDroneModel.setJoyDirection("", !mDroneModel.isModeGimBal() ? DroneAPI.DRONE_DEFAULT_PARAM : DroneAPI.DRONE_GIMBAL_AXIS_ROLL, String.valueOf(power), String.valueOf(angle));
                             break;
                     }
                 }

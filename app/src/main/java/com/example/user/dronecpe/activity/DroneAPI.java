@@ -15,6 +15,7 @@ public class DroneAPI {
      * API Income cmd from drone
      * API Prefix Drone_CMD_XXX
      */
+    public static final String DRONE_DEFAULT_PARAM = "000";
     public static final String DRONE_READY_PARAM = "001";
     public static final String DRONE_BATTERY_PARAM = "002";
     public static final String DRONE_SIGNAL_WIFI_PARAM = "003";

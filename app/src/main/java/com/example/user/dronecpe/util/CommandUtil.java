@@ -90,6 +90,9 @@ public class CommandUtil {
         String cmd = null;
         int speed = 0;
         switch (param) {
+            case DroneAPI.DRONE_DEFAULT_PARAM:
+                speed = 0;
+                break;
             case DroneAPI.DRONE_PITCH_PARAM:
                 int direc = Math.abs(Integer.parseInt(direction));
                 if (direc > 0 && direc < 90) {                  //Forward

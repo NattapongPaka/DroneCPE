@@ -127,7 +127,6 @@ public class DroneController implements
                     LogUtil.D("Send mode gimbal %s", cmd);
                 }
                 lastSpeed = droneSpeed;
-
             } else {
                 String cmd = CommandUtil.getInstance().getDirectionProtocol(droneMode, droneSpeed, droneAngle);
                 if (lastSpeed != null && !lastSpeed.isEmpty() && !droneSpeed.equals(lastSpeed)) {

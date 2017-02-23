@@ -33,10 +33,7 @@ public class DroneAPI {
     public static final String DRONE_THROTTLE_PARAM = "007";
     public static final String DRONE_YAW_PARAM = "008";
     //Direction constance
-    public static final int DRONE_PITCH_MAX = 60;
-    public static final int DRONE_ROLL_MAX = 60;
     public static final int DRONE_THROTTLE_MAX = 2000;
-    public static final int DRONE_THROTTLE_MIN = 1100;
     public static final int DRONE_YAW_MAX = 180;
 
     //Gimbal Axis
@@ -48,24 +45,17 @@ public class DroneAPI {
 
     //Action
     public static final String DRONE_RESET_PARAM = "012";
-    public static final String DRONE_ST_PARAM = "007";
+    public static final String DRONE_ST_PARAM = "013";
+
     //Action data
     public static final String DRONE_RESET_DATA = "0000";
-    public static final String DRONE_START_DATA = "1100";
-    public static final String DRONE_STOP_DATA = "1000";
-
-//    public static final String DRONE_PITCH_UP = "2";
-//    public static final String DRONE_ROLL_LEFT = "3";
-//    public static final String DRONE_ROLL_RIGHT = "4";
-//    public static final String DRONE_THROTTLE_UP = "5";
-//    public static final String DRONE_THROTTLE_DOWN = "6";
-//    public static final String DRONE_YAW_LEFT = "7";
-//    public static final String DRONE_YAW_RIGHT = "8";
-//    public static final String DRONE_TAKEOFF = "12";
-//    public static final String DRONE_LANDING = "14";
-//    public static final String DRONE_RESET_VALUE = "1";
-//    public static final String DRONE_TAKEOFF_VALUE = "1";
-//    public static final String DRONE_LANDING_VALUE = "0";
+    public static final String DRONE_MODE1 = "1000";
+    public static final String DRONE_MODE2 = "1300";
+    public static final String DRONE_MODE3 = "1400";
+    public static final String DRONE_MODE4 = "1500";
+    public static final String DRONE_MODE5 = "1700";
+    public static final String DRONE_MODE6 = "1800";
+    public static final String DRONE_STOP_DATA = "0000";
 
 
 }

@@ -488,10 +488,10 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (seekBar.getId() == R.id.seekbarThrottle) {
                     LogUtil.D("seekBarThrottle %d", seekBar.getProgress());
-                    mDroneModel.setThottle(seekBar.getProgress());
+                    mDroneModel.setThottle(seekBar.getProgress()*10+1000);
                 } else if (seekBar.getId() == R.id.seekBarYaw) {
                     LogUtil.D("seekBarYaw %d", seekBar.getProgress());
-                    mDroneModel.setYaw(seekBar.getProgress());
+                    mDroneModel.setYaw(seekBar.getProgress()*10+1000);
                 }
             }
 
@@ -503,8 +503,8 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (seekBar.getId() == R.id.seekbarThrottle) {
-                    seekBar.setProgress(50);
-                    mDroneModel.setThottle(50);
+                    //seekBar.setProgress(10);
+                    //mDroneModel.setThottle(1100);
                 } else if (seekBar.getId() == R.id.seekBarYaw) {
                     seekBar.setProgress(50);
                     mDroneModel.setYaw(50);
@@ -540,7 +540,24 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.btnInfo:
                 break;
-
+            case R.id.btnMode1:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
+                break;
+            case R.id.btnMode2:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE2);
+                break;
+            case R.id.btnMode3:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE3);
+                break;
+            case R.id.btnMode4:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE4);
+                break;
+            case R.id.btnMode5:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE5);
+                break;
+            case R.id.btnMode6:
+                mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE6);
+                break;
             case R.id.btnReset:
                 //Reset drone
                 mDroneModel.setDroneReset(DroneAPI.DRONE_RESET_DATA);
@@ -550,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements
                 //Drone Takeoff / landing
                 Button button = (Button) v;
                 if (mDroneModel.getDroneTakeOff() != null) {
-                    if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_START_DATA)) {
+                    if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_MODE1)) {
                         button.setText(R.string.drone_start);
                         arrow_up3.setImageResource(R.drawable.ic_drone_up_dark);
                         arrow_up4.setImageResource(R.drawable.ic_drone_up_dark);
@@ -559,14 +576,14 @@ public class MainActivity extends AppCompatActivity implements
                         button.setText(R.string.drone_stop);
                         arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
                         arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
-                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_START_DATA);
+                        mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
                     }
                 } else {
                     //Set first task off
                     button.setText(R.string.drone_start);
                     arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
                     arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
-                    mDroneModel.setDroneTakeOff(DroneAPI.DRONE_START_DATA);
+                    mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
                 }
                 break;
         }
@@ -666,6 +683,7 @@ public class MainActivity extends AppCompatActivity implements
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
                     angleTextViewRight.setText(" " + String.valueOf(angle) + "°");
                     powerTextViewRight.setText(" " + String.valueOf(power) + "%");
                     switch (direction) {

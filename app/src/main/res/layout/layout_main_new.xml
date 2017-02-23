@@ -1,6 +1,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:stream="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -226,7 +227,9 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            stream:type="stream_default" />
+            stream:type="stream_default"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintVertical_bias="0.0" />
 
         <!--<RelativeLayout-->
         <!--android:layout_width="0dp"-->
@@ -271,7 +274,7 @@
             android:id="@+id/joystickView2"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/seekBarYaw"
             app:layout_constraintLeft_toRightOf="@+id/joystickView1"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -287,35 +290,125 @@
 
         <com.example.user.dronecpe.view.VerticalSeekBar_Reverse
             android:id="@+id/seekbarThrottle"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="0dp"
-            android:max="100"
-            android:progress="50"
+            android:max="90"
+            android:progress="0"
             android:progressDrawable="@drawable/custom_progressbar"
             android:rotation="180"
             android:thumb="@drawable/thumb"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/btnMode1"
             app:layout_constraintHorizontal_bias="0.04"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@+id/joystickView2"
+            app:layout_constraintRight_toRightOf="@+id/seekBarYaw"
             app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/seekBarYaw"
             android:layout_width="0dp"
-            android:layout_height="22dp"
+            android:layout_height="32dp"
             android:layout_alignBottom="@+id/joystickView2"
             android:layout_alignRight="@+id/joystickView2"
             android:layout_centerHorizontal="true"
-            android:max="100"
+            android:max="90"
             android:progress="50"
             android:progressDrawable="@drawable/custom_progressbar"
             android:thumb="@drawable/thumb"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="@+id/joystickView2"
-            app:layout_constraintRight_toRightOf="@+id/joystickView2"
-            app:layout_constraintTop_toTopOf="@+id/joystickView2"
+            app:layout_constraintLeft_toLeftOf="@+id/seekbarThrottle"
+            app:layout_constraintRight_toRightOf="@+id/joystickView1"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
             app:layout_constraintVertical_bias="0.98" />
+
+        <Button
+        android:id="@+id/btnMode1"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onClick"
+        android:text="1"
+        android:textColor="@color/Black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/seekBarYaw"
+            app:layout_constraintRight_toLeftOf="@+id/btnMode2"
+        app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+        app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/btnMode2"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClick"
+            android:text="2"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btnMode1"
+            app:layout_constraintRight_toLeftOf="@+id/btnMode3"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/btnMode3"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClick"
+            android:text="3"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btnMode2"
+            app:layout_constraintRight_toLeftOf="@+id/btnMode4"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/btnMode4"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClick"
+            android:text="4"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btnMode3"
+            app:layout_constraintRight_toLeftOf="@+id/btnMode5"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/btnMode5"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClick"
+            android:text="5"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btnMode4"
+            app:layout_constraintRight_toLeftOf="@+id/btnMode6"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/btnMode6"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClick"
+            android:text="6"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/btnMode5"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/seekbarThrottle"
+            app:layout_constraintVertical_bias="1.0" />
 
     </android.support.constraint.ConstraintLayout>
 

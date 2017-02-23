@@ -96,17 +96,17 @@ public class CommandUtil {
             case DroneAPI.DRONE_PITCH_PARAM:
                 int direc = Math.abs(Integer.parseInt(direction));
                 if (direc > 0 && direc < 90) {                  //Forward
-                    speed = map(Integer.parseInt(value), 0, 100, 0, 30);
+                    speed = map(Integer.parseInt(value), 0, 100, 1600, 2000);
                 } else if (direc > 90 && direc < 180) {         //Backward
-                    speed = map(Integer.parseInt(value), 0, 100, 30, 60);
+                    speed = map(Integer.parseInt(value), 0, 100, 1400, 1000);
                 }
                 break;
             case DroneAPI.DRONE_ROLL_PARAM:
                 int direcRoll = Integer.parseInt(direction);
                 if (direcRoll < -90) {                          //Left
-                    speed = map(Integer.parseInt(value), 0, 100, 0, 30);
+                    speed = map(Integer.parseInt(value), 0, 100, 1400, 1000);
                 } else  {                                       //Right
-                    speed = map(Integer.parseInt(value), 0, 100, 30, 60);
+                    speed = map(Integer.parseInt(value), 0, 100, 1600, 2000);
                 }
                 break;
         }

@@ -507,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements
                     //mDroneModel.setThottle(1100);
                 } else if (seekBar.getId() == R.id.seekBarYaw) {
                     seekBar.setProgress(50);
-                    mDroneModel.setYaw(50);
+                    mDroneModel.setYaw(50*10+1000);
                 }
                 LogUtil.D("onStopTrackingTouch %d", seekBar.getProgress());
             }

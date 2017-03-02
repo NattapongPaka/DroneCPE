@@ -34,14 +34,14 @@ public class DroneAPI {
     public static final String DRONE_YAW_PARAM = "008";
     //Direction constance
     public static final int DRONE_THROTTLE_MAX = 2000;
-    public static final int DRONE_YAW_MAX = 180;
+    public static final int DRONE_YAW_MAX = 2000;
 
     //Gimbal Axis
     public static final String DRONE_GIMBAL_AXIS_YAW = "009";
     public static final String DRONE_GIMBAL_AXIS_PITCH = "010";
     public static final String DRONE_GIMBAL_AXIS_ROLL = "011";
     //Gimbal constance
-    public static final int DRONE_GIMBAL_3AXIS = 180;
+    public static final int DRONE_GIMBAL_3AXIS = 2000;
 
     //Action
     public static final String DRONE_RESET_PARAM = "012";

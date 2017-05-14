@@ -31,7 +31,7 @@ public class LogUtil {
 
     public static void D(@NonNull String condition, @NonNull Object... message){
         if(BuildConfig.DEBUG){
-            Logger.d(condition,message);
+            Logger.i(condition,message);
         }
     }
 

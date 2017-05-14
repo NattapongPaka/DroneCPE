@@ -28,6 +28,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -102,8 +104,12 @@ public class MainActivity extends AppCompatActivity implements
     TextView txtBettery;
     @BindView(R.id.lyBattery)
     LinearLayout lyBattery;
-    @BindView(R.id.mjpegViewDefault)
-    MjpegSurfaceView mjpegView;
+//    @BindView(R.id.mjpegViewDefault)
+//    MjpegSurfaceView mjpegView;
+
+    @BindView(R.id.webView)
+    WebView webView;
+
     @BindView(R.id.txtLatLng)
     TextView txtLatLng;
     @BindView(R.id.joystickView2)
@@ -226,12 +232,23 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+//    private void destroyMjpegView(){
+//        if (mjpegView != null && mjpegView.isStreaming()) {
+//            mjpegView.stopPlayback();
+//            mjpegView.freeCameraMemory();
+//        }
+//    }
+
+//    private void stopMjpegView(){
+//        if (mjpegView != null) {
+//            mjpegView.stopPlayback();
+//        }
+//    }
+
     @Override
     protected void onDestroy() {
-        if (mjpegView != null && mjpegView.isStreaming()) {
-            mjpegView.stopPlayback();
-            mjpegView.freeCameraMemory();
-        }
+        //destroyMjpegView();
+
         if (wifiApManager != null) {
             wifiApManager.setWifiApEnabled(null, false);
         }
@@ -253,9 +270,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onPause() {
         super.onPause();
-        if (mjpegView != null) {
-            mjpegView.stopPlayback();
-        }
+
+        //stopMjpegView();
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(mySensorEventListener);
         }
@@ -411,37 +427,61 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void loadIpCam() {
-        String userName = "";
-        String pass = "";
-
-        String hostname = "http://trackfield.webcam.oregonstate.edu"; // http://trackfield.webcam.oregonstate.edu//http://128.193.182.123
-        String url = hostname + "/axis-cgi/mjpg/video.cgi?resolution=800x600&amp%3bdummy=1333689998337";
-        int TIMEOUT = 5;
-
         String cameraIP = UtilPreference.getInstance().getIP(DialogSetting.CAMERA_IP_ID);
         int cameraPort = UtilPreference.getInstance().getPort(DialogSetting.CAMERA_PORT_ID);
-
         if (cameraIP != null && !cameraIP.isEmpty() && cameraPort != -1) {
-            url = cameraIP + ":" + cameraPort;
+            try {
+                String url = "http://" + cameraIP + ":" + String.valueOf(cameraPort)+"/jsfs.html";
+                WebSettings settings = webView.getSettings();
+                settings.setUseWideViewPort(true);
+                settings.setLoadWithOverviewMode(true);
+                settings.setJavaScriptEnabled(true);
+                //settings.setDefaultZoom(WebSettings.ZoomDensity.FAR);
 
-            //LogUtil.D("CameraIP %s\nCameraPort %d", cameraIP, cameraPort);
+                webView.setVerticalScrollBarEnabled(false);
+                webView.setHorizontalScrollBarEnabled(false);
 
-            Mjpeg.newInstance()
-                    //.credential(userName, pass)
-                    .open(url, TIMEOUT)
-                    .subscribe(
-                            inputStream -> {
-                                mjpegView.setSource(inputStream);
-                                mjpegView.setDisplayMode(MainActivity.this.calculateDisplayMode());
-                                mjpegView.showFps(true);
-                            },
-                            throwable -> {
-                                Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
-                                Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
-                            });
+                //webView.getSettings().setJavaScriptEnabled(true);
+                webView.loadUrl(url);
+            } catch (Exception e) {
+                LogUtil.E("Error %s" + e.getMessage());
+                e.printStackTrace();
+            }
         }
-
     }
+
+//    private void loadIpCam() {
+//        String userName = "";
+//        String pass = "";
+//
+//        String hostname = "http://trackfield.webcam.oregonstate.edu"; // http://trackfield.webcam.oregonstate.edu//http://128.193.182.123
+//        String url = hostname + "/axis-cgi/mjpg/video.cgi?resolution=800x600&amp%3bdummy=1333689998337";
+//        int TIMEOUT = 5;
+//
+//        String cameraIP = UtilPreference.getInstance().getIP(DialogSetting.CAMERA_IP_ID);
+//        int cameraPort = UtilPreference.getInstance().getPort(DialogSetting.CAMERA_PORT_ID);
+//
+//        if (cameraIP != null && !cameraIP.isEmpty() && cameraPort != -1) {
+//            url = cameraIP + ":" + cameraPort;
+//
+//            //LogUtil.D("CameraIP %s\nCameraPort %d", cameraIP, cameraPort);
+//
+//            Mjpeg.newInstance()
+//                    //.credential(userName, pass)
+//                    .open(url, TIMEOUT)
+//                    .subscribe(
+//                            inputStream -> {
+//                                mjpegView.setSource(inputStream);
+//                                mjpegView.setDisplayMode(MainActivity.this.calculateDisplayMode());
+//                                mjpegView.showFps(true);
+//                            },
+//                            throwable -> {
+//                                Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
+//                                Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
+//                            });
+//        }
+//
+//    }
 
     /**
      * All Initializing
@@ -544,6 +584,7 @@ public class MainActivity extends AppCompatActivity implements
                         Toast.makeText(MainActivity.this, "Start Connect drone", Toast.LENGTH_SHORT).show();
                         mDroneModel.setDroneIP(droneIP);
                         mDroneModel.setPlayerIP(NetworkUtil.getInstance().getIPAddressIP4());
+                        loadIpCam();
                     }
                 });
                 break;

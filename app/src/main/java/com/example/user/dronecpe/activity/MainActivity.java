@@ -418,19 +418,29 @@ public class MainActivity extends AppCompatActivity implements
         String url = hostname + "/axis-cgi/mjpg/video.cgi?resolution=800x600&amp%3bdummy=1333689998337";
         int TIMEOUT = 5;
 
-        Mjpeg.newInstance()
-                //.credential(userName, pass)
-                .open(url, TIMEOUT)
-                .subscribe(
-                        inputStream -> {
-                            mjpegView.setSource(inputStream);
-                            mjpegView.setDisplayMode(MainActivity.this.calculateDisplayMode());
-                            mjpegView.showFps(true);
-                        },
-                        throwable -> {
-                            Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
-                            Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
-                        });
+        String cameraIP = UtilPreference.getInstance().getIP(DialogSetting.CAMERA_IP_ID);
+        int cameraPort = UtilPreference.getInstance().getPort(DialogSetting.CAMERA_PORT_ID);
+
+        if (cameraIP != null && !cameraIP.isEmpty() && cameraPort != -1) {
+            url = cameraIP + ":" + cameraPort;
+
+            //LogUtil.D("CameraIP %s\nCameraPort %d", cameraIP, cameraPort);
+
+            Mjpeg.newInstance()
+                    //.credential(userName, pass)
+                    .open(url, TIMEOUT)
+                    .subscribe(
+                            inputStream -> {
+                                mjpegView.setSource(inputStream);
+                                mjpegView.setDisplayMode(MainActivity.this.calculateDisplayMode());
+                                mjpegView.showFps(true);
+                            },
+                            throwable -> {
+                                Log.e(MainActivity.this.getClass().getSimpleName(), "mjpeg error", throwable);
+                                Toast.makeText(MainActivity.this, "Load camera error", Toast.LENGTH_LONG).show();
+                            });
+        }
+
     }
 
     /**
@@ -488,10 +498,10 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (seekBar.getId() == R.id.seekbarThrottle) {
                     LogUtil.D("seekBarThrottle %d", seekBar.getProgress());
-                    mDroneModel.setThottle(seekBar.getProgress()*10+1000);
+                    mDroneModel.setThottle(seekBar.getProgress() * 10 + 1000);
                 } else if (seekBar.getId() == R.id.seekBarYaw) {
                     LogUtil.D("seekBarYaw %d", seekBar.getProgress());
-                    mDroneModel.setYaw(seekBar.getProgress()*10+1000);
+                    mDroneModel.setYaw(seekBar.getProgress() * 10 + 1000);
                 }
             }
 

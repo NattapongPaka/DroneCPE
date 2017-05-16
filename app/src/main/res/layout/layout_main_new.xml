@@ -481,11 +481,27 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="6dp"
             android:checked="false"
+            android:layout_alignParentLeft="true"
             android:drawableTop="@drawable/ic_toggle"
             android:gravity="center"
             android:textColor="@color/Black"
             android:textOff="Off"
             android:textOn="On" />
+
+        <ToggleButton
+            android:id="@+id/btnTakePhoto"
+            style="@android:style/Widget.Holo.Button.Borderless.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="6dp"
+            android:layout_alignParentRight="true"
+            android:checked="false"
+            android:visibility="visible"
+            android:drawableTop="@drawable/ic_photo_camera_grey_600_24dp"
+            android:gravity="center"
+            android:textColor="@color/Black"
+            android:textOff="Take"
+            android:textOn="Take" />
 
         <!--<ImageButton-->
         <!--android:id="@+id/btnSetting"-->
@@ -527,10 +543,10 @@
             android:text="ss"
             android:visibility="gone" />
 
-
         <!-- Right -->
         <TextView
             android:id="@+id/txt4"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -539,6 +555,7 @@
 
         <TextView
             android:id="@+id/txt5"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -547,10 +564,12 @@
 
         <TextView
             android:id="@+id/txt6"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:text="ss" />
     </RelativeLayout>
+
 </android.support.constraint.ConstraintLayout>

@@ -220,17 +220,17 @@
         app:layout_constraintVertical_bias="1.0">
 
         <!--<com.github.niqdev.mjpeg.MjpegSurfaceView-->
-            <!---->
-            <!--android:id="@+id/mjpegViewDefault"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="0dp"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--stream:type="stream_default"-->
-            <!--app:layout_constraintHorizontal_bias="0.0"-->
-            <!--app:layout_constraintVertical_bias="0.0" />-->
+        <!---->
+        <!--android:id="@+id/mjpegViewDefault"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="0dp"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--stream:type="stream_default"-->
+        <!--app:layout_constraintHorizontal_bias="0.0"-->
+        <!--app:layout_constraintVertical_bias="0.0" />-->
 
         <WebView
             android:id="@+id/webView"
@@ -485,22 +485,7 @@
             android:textOff="Off"
             android:textOn="On" />
 
-        <ToggleButton
-            android:id="@+id/btnTakePhoto"
-            style="@android:style/Widget.Holo.Button.Borderless.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="6dp"
-            android:layout_alignParentRight="true"
-            android:checked="false"
-            android:visibility="visible"
-            android:drawableTop="@drawable/ic_photo_camera_grey_600_24dp"
-            android:gravity="center"
-            android:textColor="@color/Black"
-            android:textOff="Take"
-            android:textOn="Take" />
-
-        <ToggleButton
+        <Button
             android:id="@+id/btnTakePhoto"
             style="@android:style/Widget.Holo.Button.Borderless.Small"
             android:layout_width="wrap_content"
@@ -510,12 +495,11 @@
             android:checked="false"
             android:drawableTop="@drawable/ic_photo_camera_black_24dp"
             android:gravity="center"
-            android:textColor="@color/Black"
-            android:textOff="TakePhoto"
-            android:textOn="TakePhoto" />
+            android:text="TakePhoto"
+            android:textColor="@color/Black" />
 
         <ToggleButton
-            android:id="@+id/btnRecVideo"
+            android:id="@+id/tggRecVideo"
             style="@android:style/Widget.Holo.Button.Borderless.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

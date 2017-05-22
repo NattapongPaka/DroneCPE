@@ -1,6 +1,9 @@
 package com.example.user.dronecpe.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -29,9 +32,18 @@ public class Util {
         return listObject.get(i1);
     }
 
-    public int randomNum(int max){
+    public int randomNum(int max) {
         int min = 1;
         return random.nextInt(max - min + 1) + min;
     }
 
+    public String getCurrentTimeStamp() {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            return dateFormat.format(new Date());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -5,11 +5,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.user.dronecpe.BuildConfig;
+import com.example.user.dronecpe.manager.HttpManager;
 import com.example.user.dronecpe.model.DroneModel;
 import com.example.user.dronecpe.model.GPSTracker;
+import com.example.user.dronecpe.model.RecDao;
 import com.example.user.dronecpe.util.CommandUtil;
 import com.example.user.dronecpe.util.LogUtil;
 import com.example.user.dronecpe.util.NetworkUtil;
+import com.example.user.dronecpe.util.Util;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -18,8 +21,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import rx.Observable;
+import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -48,9 +53,9 @@ public class DroneController implements
     private DroneModel mDroneModel = DroneApp.getInstanceDroneModel();
     private GPSTracker mGpsTracker;
 
-    private long  LOCATION_UPDATE_INTERVAL      = 100;
-    private long  LOCATION_TIMEOUT_IN_SECONDS   = 10;
-    private float SUFFICIENT_ACCURACY           = 100.0f;
+    private long LOCATION_UPDATE_INTERVAL = 100;
+    private long LOCATION_TIMEOUT_IN_SECONDS = 10;
+    private float SUFFICIENT_ACCURACY = 100.0f;
 
     private String lastSpeed;
 
@@ -386,6 +391,84 @@ public class DroneController implements
                 mDroneModel.setGps(String.valueOf(val));
             }
         }
+    }
+
+    public void takePhoto() {
+        HttpManager.getInstance().getService().takePhoto()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                        mDroneModel.setResponse("Take photo success");
+                        LogUtil.D("TakePhoto Response %s", s);
+                    }
+                });
+
+    }
+
+    public void recordVideo(boolean isStartRecord) {
+        if (isStartRecord) {
+            startRecord();
+        } else {
+            stopRecord();
+        }
+    }
+
+    private void startRecord() {
+        String tag = Util.getInstance().getCurrentTimeStamp();
+        HttpManager.getInstance().getService().startRecordVideo(tag)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<RecDao>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RecDao s) {
+                        LogUtil.D("Start Record Response %s", s);
+                    }
+                });
+    }
+
+    private void stopRecord() {
+        HttpManager.getInstance().getService().stopRecordVideo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<RecDao>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(RecDao s) {
+                        mDroneModel.setResponse("Record Success");
+                        LogUtil.D("Stop Record Response %s", s);
+                    }
+                });
     }
 
 

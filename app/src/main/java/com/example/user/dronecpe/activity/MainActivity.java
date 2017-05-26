@@ -65,6 +65,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
+import butterknife.OnClick;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -75,7 +76,8 @@ public class MainActivity extends AppCompatActivity implements
         DroneModel.OnGPSListener,
         OnClickListener,
         DroneModel.OnGPSPlayerListener,
-        DroneModel.OnIPListener {
+        DroneModel.OnIPListener,
+        DroneModel.OnCameraListener{
 
 
     @BindView(R.id.imgGPS)
@@ -156,6 +158,10 @@ public class MainActivity extends AppCompatActivity implements
     ToggleButton btnCameraControl;
     @BindView(R.id.bottomPanel)
     RelativeLayout bottomPanel;
+    @BindView(R.id.btnTakePhoto)
+    Button tggTakePhoto;
+    @BindView(R.id.tggRecVideo)
+    ToggleButton tggRecVideo;
 
 
 //    @BindView(R.id.joystickView1)
@@ -220,6 +226,17 @@ public class MainActivity extends AppCompatActivity implements
     private final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
     private long mBackPressed;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        InitLayout();
+        InitView();
+        InitEvent();
+        requestPermissionLocation();
+        wifiApManager = new WifiApManager(this);
+        startService(new Intent(this, GPSTracker.class));
+    }
+
     /**
      * Activity Life cycle
      */
@@ -232,18 +249,30 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-//    private void destroyMjpegView(){
-//        if (mjpegView != null && mjpegView.isStreaming()) {
-//            mjpegView.stopPlayback();
-//            mjpegView.freeCameraMemory();
-//        }
-//    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadIpCam();
+        mTimer1 = new Runnable() {
+            @Override
+            public void run() {
+                //mHandler.postDelayed(this,AccelerometerView.DEFAULT_LOOP_INTERVAL);
+                //mDroneModel.setAcceleration(acceleration);
+            }
+        };
+        mHandler.post(mTimer1);
+    }
 
-//    private void stopMjpegView(){
-//        if (mjpegView != null) {
-//            mjpegView.stopPlayback();
-//        }
-//    }
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        //stopMjpegView();
+        if (mSensorManager != null) {
+            mSensorManager.unregisterListener(mySensorEventListener);
+        }
+        mHandler.removeCallbacks(mTimer1);
+    }
 
     @Override
     protected void onDestroy() {
@@ -267,30 +296,18 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
+//    private void destroyMjpegView(){
+//        if (mjpegView != null && mjpegView.isStreaming()) {
+//            mjpegView.stopPlayback();
+//            mjpegView.freeCameraMemory();
+//        }
+//    }
 
-        //stopMjpegView();
-        if (mSensorManager != null) {
-            mSensorManager.unregisterListener(mySensorEventListener);
-        }
-        mHandler.removeCallbacks(mTimer1);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadIpCam();
-        mTimer1 = new Runnable() {
-            @Override
-            public void run() {
-                //mHandler.postDelayed(this,AccelerometerView.DEFAULT_LOOP_INTERVAL);
-                //mDroneModel.setAcceleration(acceleration);
-            }
-        };
-        mHandler.post(mTimer1);
-    }
+//    private void stopMjpegView(){
+//        if (mjpegView != null) {
+//            mjpegView.stopPlayback();
+//        }
+//    }
 
 
     /**
@@ -397,17 +414,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        InitLayout();
-        InitView();
-        InitEvent();
-        requestPermissionLocation();
-        wifiApManager = new WifiApManager(this);
-        startService(new Intent(this, GPSTracker.class));
-    }
-
-    @Override
     public void onBackPressed() {
         if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis()) {
             super.onBackPressed();
@@ -431,7 +437,7 @@ public class MainActivity extends AppCompatActivity implements
         int cameraPort = UtilPreference.getInstance().getPort(DialogSetting.CAMERA_PORT_ID);
         if (cameraIP != null && !cameraIP.isEmpty() && cameraPort != -1) {
             try {
-                String url = "http://" + cameraIP + ":" + String.valueOf(cameraPort)+"/jsfs.html";
+                String url = "http://" + cameraIP + ":" + String.valueOf(cameraPort) + "/jsfs.html";
                 WebSettings settings = webView.getSettings();
                 settings.setUseWideViewPort(true);
                 settings.setLoadWithOverviewMode(true);
@@ -510,6 +516,7 @@ public class MainActivity extends AppCompatActivity implements
         mDroneModel.setOnGPSListener(this);
         mDroneModel.setOnGPSPlayerListener(this);
         mDroneModel.setOnIPListener(this);
+        mDroneModel.setOnCameraListener(this);
         // Register Joy Listener
         //joystickLeft.setOnJoystickMoveListener(onJoystickMoveListenerLeft, JoystickView.DEFAULT_LOOP_INTERVAL);
         joystickRight.setOnJoystickMoveListener(onJoystickMoveListenerRight, JoystickView.DEFAULT_LOOP_INTERVAL);
@@ -934,6 +941,32 @@ public class MainActivity extends AppCompatActivity implements
             txtDroneIP.setText(droneModel.getDroneIP());
         }
     }
+
+    @OnClick(R.id.btnTakePhoto)
+    public void onTakePhoto() {
+        if(mDroneController != null) {
+            mDroneController.takePhoto();
+        }
+    }
+
+    @OnCheckedChanged(R.id.tggRecVideo)
+    public void onRecordVideo(boolean isChecked) {
+        if(mDroneController != null){
+            mDroneController.recordVideo(isChecked);
+        }
+    }
+
+    @Override
+    public void onResponse(DroneModel droneModel) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String response = droneModel.getResponse();
+                Toast.makeText(MainActivity.this,response,Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     /**
      * Broadcast

@@ -29,6 +29,7 @@ public class DroneModel {
 	private int yaw;
 
 	private boolean modeGimBal;
+	private String response;
 	/*******************************************************************
 	 * 
 	 * 1.Method Interface Listener
@@ -83,6 +84,11 @@ public class DroneModel {
 		void onIPChangerListener(DroneModel droneModel);
 	}
 
+	public interface OnCameraListener{
+		void onResponse(DroneModel droneModel);
+	}
+
+
 	/*******************************************************************
 	 * 
 	 * 2.Call back register listener
@@ -100,6 +106,7 @@ public class DroneModel {
 	private OnSeekBarThrottleListener onSeekBarThrottleListener;
 	private OnSeekBarYawListener onSeekBarYawListener;
 	private OnIPListener onIPListener;
+	private OnCameraListener onCameraListener;
 	/*******************************************************************
 	 * 
 	 * 3.Method Listener
@@ -141,6 +148,10 @@ public class DroneModel {
 
 	public void setOnIPListener(OnIPListener onIPListener){
 		this.onIPListener = onIPListener;
+	}
+
+	public void setOnCameraListener(OnCameraListener onCameraListener){
+		this.onCameraListener = onCameraListener;
 	}
 	/*******************************************************************
 	 * 
@@ -259,6 +270,13 @@ public class DroneModel {
 		}
 	}
 
+	public void setResponse(String response){
+		this.response = response;
+		if(onCameraListener != null){
+			this.onCameraListener.onResponse(this);
+		}
+	}
+
 	/*******************************************************************
 	 * 
 	 * 5.Method Getter
@@ -350,5 +368,9 @@ public class DroneModel {
 
 	public String getDroneIP() {
 		return droneIP;
+	}
+
+	public String getResponse(){
+		return response;
 	}
 }

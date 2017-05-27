@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.tggRecVideo)
     ToggleButton tggRecVideo;
 
+    public boolean take_off = false;
 
 //    @BindView(R.id.joystickView1)
 //    JoystickView joystickLeft;
@@ -497,6 +499,9 @@ public class MainActivity extends AppCompatActivity implements
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.layout_main_new);
         ButterKnife.bind(this);
+        set_color(1);
+        Button btnTakeOff = (Button)findViewById(R.id.btnTakeOff);
+        btnTakeOff.setBackgroundColor(Color.WHITE);
     }
 
     public void InitView() {
@@ -559,9 +564,9 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (seekBar.getId() == R.id.seekbarThrottle) {
-                    //seekBar.setProgress(10);
-                    //mDroneModel.setThottle(1100);
+                if (seekBar.getId() == R.id.seekbarThrottle && take_off) {
+                    seekBar.setProgress(50);
+                    mDroneModel.setThottle(50*10+1000);
                 } else if (seekBar.getId() == R.id.seekBarYaw) {
                     seekBar.setProgress(50);
                     mDroneModel.setYaw(50*10+1000);
@@ -571,6 +576,37 @@ public class MainActivity extends AppCompatActivity implements
         };
     }
 
+    public void set_color(int mode){
+        Button m1 = (Button) findViewById(R.id.btnMode1);
+        Button m2 = (Button) findViewById(R.id.btnMode2);
+        Button m3 = (Button) findViewById(R.id.btnMode3);
+        Button m4 = (Button) findViewById(R.id.btnMode4);
+        Button m5 = (Button) findViewById(R.id.btnMode5);
+        Button m6 = (Button) findViewById(R.id.btnMode6);
+
+        m1.setBackgroundColor(Color.WHITE);
+        m2.setBackgroundColor(Color.WHITE);
+        m3.setBackgroundColor(Color.WHITE);
+        m4.setBackgroundColor(Color.WHITE);
+        m5.setBackgroundColor(Color.WHITE);
+        m6.setBackgroundColor(Color.WHITE);
+
+        switch (mode){
+            case 1:m1.setBackgroundColor(Color.GREEN);
+                break;
+            case 2:m2.setBackgroundColor(Color.GREEN);
+                break;
+            case 3:m3.setBackgroundColor(Color.GREEN);
+                break;
+            case 4:m4.setBackgroundColor(Color.GREEN);
+                break;
+            case 5:m5.setBackgroundColor(Color.GREEN);
+                break;
+            case 6:m6.setBackgroundColor(Color.GREEN);
+                break;
+        }
+
+    }
     /**
      * All button event
      *
@@ -600,21 +636,27 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.btnMode1:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
+                set_color(1);
                 break;
             case R.id.btnMode2:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE2);
+                set_color(2);
                 break;
             case R.id.btnMode3:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE3);
+                set_color(3);
                 break;
             case R.id.btnMode4:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE4);
+                set_color(4);
                 break;
             case R.id.btnMode5:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE5);
+                set_color(5);
                 break;
             case R.id.btnMode6:
                 mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE6);
+                set_color(6);
                 break;
             case R.id.btnReset:
                 //Reset drone
@@ -624,6 +666,26 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.btnTakeOff:
                 //Drone Takeoff / landing
                 Button button = (Button) v;
+                if (take_off) {
+                    button.setText(R.string.drone_start);
+                    arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
+                    arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
+                    button.setBackgroundColor(Color.WHITE);
+                    //mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
+                    take_off = false;
+                } else {
+                    //Set first task off
+                    button.setText(R.string.drone_stop);
+                    arrow_up3.setImageResource(R.drawable.ic_drone_down_dark);
+                    arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
+                    button.setBackgroundColor(Color.GREEN);
+                    //mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
+                    seekbarThrottle.setProgress(50);
+                    mDroneModel.setThottle(50*10+1000);
+                    take_off = true;
+                }
+
+                /*
                 if (mDroneModel.getDroneTakeOff() != null) {
                     if (mDroneModel.getDroneTakeOff().equals(DroneAPI.DRONE_MODE1)) {
                         button.setText(R.string.drone_start);
@@ -643,6 +705,7 @@ public class MainActivity extends AppCompatActivity implements
                     arrow_up4.setImageResource(R.drawable.ic_drone_down_dark);
                     mDroneModel.setDroneTakeOff(DroneAPI.DRONE_MODE1);
                 }
+                */
                 break;
         }
     }
